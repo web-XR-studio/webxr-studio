@@ -5,7 +5,6 @@ import "server-only";
 import { asc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { company, portfolio, faqs, siteSettings } from "@/db/schema";
-import * as P from "@/lib/__preview-fixtures";
 
 // The public pages are `force-dynamic`, but the site layout also reads content.
 // Wrap queries so an unreachable DB (e.g. during `next build`, or before
@@ -23,7 +22,7 @@ export async function getCompany() {
   return safe(async () => {
     const rows = await db.select().from(company).limit(1);
     return rows[0] ?? null;
-  }, P.PREVIEW_COMPANY);
+  }, null);
 }
 
 export async function getPortfolio() {
@@ -33,7 +32,7 @@ export async function getPortfolio() {
         .select()
         .from(portfolio)
         .orderBy(asc(portfolio.order), asc(portfolio.id)),
-    P.PREVIEW_PORTFOLIO,
+    [],
   );
 }
 
@@ -41,7 +40,7 @@ export async function getPortfolio() {
 export async function getPortfolioItem(id: number) {
   const rows = await safe(
     () => db.select().from(portfolio).where(eq(portfolio.id, id)).limit(1),
-    P.PREVIEW_PORTFOLIO.filter((p) => p.id === id),
+    [],
   );
   return rows[0] ?? null;
 }
@@ -49,7 +48,7 @@ export async function getPortfolioItem(id: number) {
 export async function getFaqs() {
   return safe(
     () => db.select().from(faqs).orderBy(asc(faqs.order), asc(faqs.id)),
-    P.PREVIEW_FAQS,
+    [],
   );
 }
 
@@ -57,5 +56,5 @@ export async function getSiteSettings() {
   return safe(async () => {
     const rows = await db.select().from(siteSettings).limit(1);
     return rows[0] ?? null;
-  }, P.PREVIEW_SETTINGS);
+  }, null);
 }
