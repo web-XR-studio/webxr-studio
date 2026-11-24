@@ -2,6 +2,7 @@ import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { FooterBanner } from "@/components/layout/FooterBanner";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
+import { RevealObserver } from "@/components/ui/RevealObserver";
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/content";
 
@@ -46,10 +47,13 @@ export default async function SiteLayout({
           最新の内容が出る。 */}
       <Header />
       <main className="flex-1">{children}</main>
-      {/* 全ページ共通の問い合わせ導線。フッターの直前に置く。 */}
-      <FooterBanner />
+      {/* 全ページ共通の問い合わせ導線。フッターの直前に置く。電話番号が
+          設定されていれば、フォームと並べて出す。 */}
+      <FooterBanner phone={settings?.phone || undefined} />
       <Footer settings={settings} />
       <ScrollToTop />
+      {/* スクロールに合わせた出現演出。[data-reveal] を見張るだけで描画はしない。 */}
+      <RevealObserver />
     </div>
   );
 }

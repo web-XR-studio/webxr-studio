@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { Section } from "@/components/ui/Section";
+import { EXPERIENCE } from "@/lib/company-facts";
+import { revealDelay } from "@/lib/reveal";
 
 /**
  * COMPANY HISTORY — a dated timeline of how the studio grew.
@@ -90,12 +92,8 @@ const ERAS: Era[] = [
       "会社設立から6年。しかし、私たちの開発経験は会社設立年数だけでは測れません。",
     ],
     itemsLabel: "各領域の経験年数",
-    items: [
-      "Web制作：10年以上",
-      "システム開発：8年以上",
-      "アプリ開発：6年以上",
-      "AI開発：3年以上",
-    ],
+    // トップページの数字の帯と同じ値。lib/company-facts.ts で一元管理する。
+    items: EXPERIENCE.map((e) => `${e.label}：${e.years}年以上`),
   },
 ];
 
@@ -111,15 +109,19 @@ export function CompanyHistory() {
     <Section
       id="history"
       tone="muted"
-      align="center"
       eyebrow="COMPANY HISTORY"
       title="経験から生まれた、WEB-XR.studioの歩み"
     >
-      <div className="mx-auto max-w-3xl space-y-5 text-left text-base leading-relaxed text-ink-soft sm:text-lg">
+      <div
+        data-reveal
+        className="max-w-3xl space-y-5 text-base leading-[2.05] text-ink-soft sm:text-lg"
+      >
         <p>
           WEB-XR.studioは、Web制作、システム開発、アプリ開発、AI開発を通じて、企業の課題解決と新しい価値の創出に取り組んできました。
         </p>
-        <p>その歩みは、会社設立から始まったものではありません。</p>
+        <p className="text-lg font-bold text-ink sm:text-xl">
+          その歩みは、会社設立から始まったものではありません。
+        </p>
         <p>
           ゲーム・アニメ業界で培われた企画・演出・デザインの経験と、長年にわたるWeb・システム開発の経験をもとに、小さな開発チームからスタートしました。
         </p>
@@ -128,44 +130,61 @@ export function CompanyHistory() {
         </p>
       </div>
 
-      {/* 年表。左にバナー＋年、右に解説。狭い画面では縦積みになる。 */}
-      <ol className="mx-auto mt-16 max-w-5xl space-y-14 text-left">
+      {/* 年表。中央（狭い画面では左）に縦の線を通し、年ごとに光る点を置く。
+          左に年と写真、右に解説。 */}
+      <div className="relative mt-20">
+        <div
+          aria-hidden
+          className="absolute bottom-0 left-[0.6875rem] top-2 w-px bg-gradient-to-b from-accent/60 via-cyan/50 to-violet/40 lg:left-1/2"
+        />
+      <ol className="relative space-y-16 lg:space-y-24">
         {ERAS.map((era) => (
           <li
             key={era.period}
-            className="grid gap-6 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1fr)] lg:gap-10"
+            className="relative grid gap-8 pl-10 lg:grid-cols-2 lg:gap-28 lg:pl-0"
           >
-            {/* バナーと年。年は画像の下端をまたぐ位置に置き、高さの半分が
-                画像に重なる。`-mt-[1em]` が文字高の半分ぶんの引き上げ。 */}
-            <div className="relative">
-              <Image
-                src={era.image}
-                alt=""
-                aria-hidden
-                width={1280}
-                height={853}
-                sizes="(min-width: 1024px) 28rem, 100vw"
-                className="h-auto w-full border border-line"
-              />
-              <p className="relative z-10 -mt-[0.5em] pl-4 text-4xl font-black leading-none tracking-tight text-accent-ink drop-shadow-[0_2px_8px_rgb(255,255,255,0.9)] sm:text-5xl">
+            {/* 線の上の点。 */}
+            <span
+              aria-hidden
+              className="absolute left-0 top-3 flex h-[1.375rem] w-[1.375rem] items-center justify-center rounded-full bg-card shadow-[0_0_0_6px_rgb(0_102_255_/_0.12)] lg:left-1/2 lg:-translate-x-1/2"
+            >
+              <span className="h-2.5 w-2.5 rounded-full bg-accent" />
+            </span>
+
+            <div data-reveal>
+              <p className="text-gradient inline-block font-display text-4xl font-extrabold leading-none tracking-tight sm:text-5xl">
                 {era.period}
               </p>
+              <div
+                data-reveal="mask"
+                className="relative mt-6 aspect-[3/2] overflow-hidden rounded-2xl border border-line"
+              >
+                <Image
+                  src={era.image}
+                  alt=""
+                  aria-hidden
+                  fill
+                  sizes="(min-width: 1024px) 30rem, 100vw"
+                  className="reveal-zoom object-cover"
+                />
+              </div>
             </div>
 
-            <div className="lg:pt-2">
-              <h3 className="text-xl font-bold tracking-tight text-ink sm:text-2xl">
+            <div data-reveal style={revealDelay(1, 140)} className="lg:pt-14">
+              <h3 className="text-xl font-bold leading-snug tracking-tight text-ink sm:text-2xl">
                 {era.title}
               </h3>
-              <div className="mt-4 space-y-4 text-base leading-relaxed text-ink-soft">
+              <div className="mt-5 space-y-4 text-base leading-[2] text-ink-soft">
                 {era.body.map((line) => (
                   <p key={line}>{line}</p>
                 ))}
               </div>
 
               {era.items && (
-                <div className="mt-5">
+                <div className="mt-6">
                   {era.itemsLabel && (
-                    <p className="text-xs font-bold uppercase tracking-[0.18em] text-muted">
+                    <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-accent-ink">
+                      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
                       {era.itemsLabel}
                     </p>
                   )}
@@ -173,7 +192,7 @@ export function CompanyHistory() {
                     {era.items.map((it) => (
                       <li
                         key={it}
-                        className="border border-line bg-card px-3 py-1.5 text-sm text-ink-soft"
+                        className="rounded-full border border-line bg-card px-3.5 py-1.5 text-sm text-ink-soft"
                       >
                         {it}
                       </li>
@@ -185,13 +204,19 @@ export function CompanyHistory() {
           </li>
         ))}
       </ol>
+      </div>
 
-      <div className="mx-auto mt-16 max-w-3xl space-y-4 text-left text-base leading-relaxed text-ink-soft sm:text-lg">
+      <div
+        data-reveal
+        className="mx-auto mt-24 max-w-3xl space-y-4 text-base leading-[2.05] text-ink-soft sm:text-lg"
+      >
         {CLOSING.map((line) => (
           <p key={line}>{line}</p>
         ))}
-        <p className="pt-4 text-lg font-bold text-ink sm:text-xl">
-          WEB-XR.studioは、過去の経験を未来の技術へつなげる開発会社です。
+        <p className="pt-6 text-xl font-black leading-relaxed text-ink sm:text-2xl">
+          WEB-XR.studioは、
+          <span className="text-accent-ink">過去の経験を未来の技術へつなげる</span>
+          開発会社です。
         </p>
       </div>
     </Section>

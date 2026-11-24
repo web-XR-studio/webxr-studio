@@ -126,53 +126,77 @@ export function ProjectMatch() {
 
   return (
     <>
-      {/* 説明文とボタンの間の区切り。白を薄く敷くだけにして、青地の上で
-          線そのものが主張しないようにする。 */}
-      <hr className="mt-8 border-0 border-t border-white/30" />
-
       {/* 2つのボタンを半分ずつに割る。等幅の2列にすると、どちらも同じ重さ
           の選択肢に見える。狭い画面では横に並べると文字が窮屈なので、
           そこだけ積み上げる。 */}
-      <div className="mt-8 grid gap-3 sm:grid-cols-2">
+      <div className="mt-10 grid gap-3 sm:grid-cols-2">
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-7 py-3.5 text-base font-bold tracking-tight text-chrome shadow-lg transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          className="group/pm relative inline-flex h-[3.75rem] items-center justify-between gap-3 overflow-hidden rounded-full bg-white pl-7 pr-2 text-base font-bold tracking-wide text-navy-900 shadow-[0_12px_40px_rgb(0_102_255_/_0.35)] transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
         >
-          即時解決OK
-          <svg
-            viewBox="0 0 20 20"
+          {/* 光の筋がホバーで横切る。 */}
+          <span
             aria-hidden
-            className="h-4 w-4 shrink-0"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/4 -skew-x-12 bg-gradient-to-r from-transparent via-accent/15 to-transparent transition-transform duration-700 ease-out group-hover/pm:translate-x-[520%]"
+          />
+          <span className="flex items-center gap-2.5">
+            <svg
+              viewBox="0 0 24 24"
+              aria-hidden
+              className="h-5 w-5 shrink-0 text-accent"
+              fill="currentColor"
+            >
+              <path d="M12 2.5c.4 3.9 1.9 5.9 5.9 6.6-4 .7-5.5 2.7-5.9 6.6-.4-3.9-1.9-5.9-5.9-6.6 4-.7 5.5-2.7 5.9-6.6zM18.5 14c.2 2 1 3 3 3.4-2 .3-2.8 1.3-3 3.3-.2-2-1-3-3-3.3 2-.4 2.8-1.4 3-3.4z" />
+            </svg>
+            即時解決OK
+          </span>
+          <span
+            aria-hidden
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-white transition-transform duration-300 group-hover/pm:translate-x-0.5"
           >
-            <path d="M4 10h11M10 5l5 5-5 5" />
-          </svg>
+            <svg
+              viewBox="0 0 20 20"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 10h11M11 5l5 5-5 5" />
+            </svg>
+          </span>
         </button>
 
         <Link
           href="/contact"
-          className="inline-flex items-center justify-center gap-2 rounded-xl border-2 border-white/70 bg-white/10 px-7 py-3.5 text-base font-bold tracking-tight text-white backdrop-blur-sm transition-colors hover:bg-white/20 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
+          className="group/pm inline-flex h-[3.75rem] items-center justify-between gap-3 rounded-full border border-white/35 bg-white/[0.06] pl-7 pr-2 text-base font-bold tracking-wide text-white backdrop-blur-sm transition-colors duration-300 hover:border-white hover:bg-white/[0.12] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60"
         >
           お問い合わせ
-          <svg
-            viewBox="0 0 20 20"
+          <span
             aria-hidden
-            className="h-4 w-4 shrink-0"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-white/40 transition-colors duration-300 group-hover/pm:border-white group-hover/pm:bg-white group-hover/pm:text-navy-900"
           >
-            <path d="M4 10h11M10 5l5 5-5 5" />
-          </svg>
+            <svg
+              viewBox="0 0 20 20"
+              className="h-4 w-4"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2.4}
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M4 10h11M11 5l5 5-5 5" />
+            </svg>
+          </span>
         </Link>
       </div>
+
+      {/* 「即時解決OK」が何をするボタンなのかを一言で添える。 */}
+      <p className="mt-4 text-xs leading-relaxed text-white/60 sm:text-[0.8rem]">
+        「即時解決OK」では、ご相談内容から担当チームと近い実績をその場でご案内します。
+      </p>
 
       {open && (
         <div

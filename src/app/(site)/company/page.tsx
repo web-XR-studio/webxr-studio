@@ -38,32 +38,45 @@ export default async function CompanyPage() {
           ビジョンは対応する項目がないためこのページの定数。 */}
       <Section
         id="philosophy"
+        tone="dark"
         align="center"
-        eyebrow="Philosophy"
+        eyebrow="PHILOSOPHY"
         title="企業理念"
+        backdrop={
+          <>
+            <div className="bg-grid-dark absolute inset-0" />
+            <div className="aurora aurora-blue -left-[10%] -top-[30%] h-[40rem] w-[40rem]" />
+            <div className="aurora aurora-violet -bottom-[40%] -right-[10%] h-[40rem] w-[40rem]" />
+          </>
+        }
       >
         <div className="mx-auto grid max-w-5xl gap-6 text-left md:grid-cols-2">
-          <div className="border border-line bg-card p-8 sm:p-10">
-            <p className="text-sm font-bold tracking-[0.18em] text-accent-ink">
+          <div
+            data-reveal
+            className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 backdrop-blur-sm sm:p-12"
+          >
+            <p className="font-display text-sm font-semibold tracking-[0.26em] text-cyan">
               VISION
             </p>
-            <h3 className="mt-2 text-xl font-bold tracking-tight text-ink sm:text-2xl">
-              ビジョン
-            </h3>
-            <p className="mt-5 text-base leading-relaxed text-ink-soft sm:text-lg">
+            <h3 className="mt-2 text-base font-bold text-white/80">ビジョン</h3>
+            <p className="mt-6 text-xl font-black leading-[1.75] sm:text-2xl">
               {VISION}
             </p>
           </div>
 
           {company?.mission && (
-            <div className="border border-line bg-card p-8 sm:p-10">
-              <p className="text-sm font-bold tracking-[0.18em] text-accent-ink">
+            <div
+              data-reveal
+              style={{ "--reveal-delay": "120ms" } as React.CSSProperties}
+              className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 backdrop-blur-sm sm:p-12"
+            >
+              <p className="font-display text-sm font-semibold tracking-[0.26em] text-cyan">
                 MISSION
               </p>
-              <h3 className="mt-2 text-xl font-bold tracking-tight text-ink sm:text-2xl">
+              <h3 className="mt-2 text-base font-bold text-white/80">
                 ミッション
               </h3>
-              <p className="mt-5 whitespace-pre-line text-base leading-relaxed text-ink-soft sm:text-lg">
+              <p className="mt-6 whitespace-pre-line text-xl font-black leading-[1.75] sm:text-2xl">
                 {company.mission}
               </p>
             </div>

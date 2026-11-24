@@ -88,6 +88,12 @@ npm run dev
 | `npm run db:studio`               | Drizzle Studio（DB GUI）      |
 | `npm run setup`                   | migrate + seed をまとめて実行 |
 
+ヒーローの日本地図（ドット表現）は `scripts/assets/japan-map.png` から生成したデータです。地図の元画像やドットの細かさ（`STEP`）を変えたときは、次で作り直します。
+
+```bash
+npx tsx scripts/generate-japan-dots.mts   # → src/components/sections/hero/japan-dots.ts
+```
+
 ## 使い方
 
 ### コンテンツの編集
@@ -120,7 +126,8 @@ src/
   db/                    Drizzle schema・接続・migrate・seed
   lib/                   auth / content / embeddings / rag / groq / sections / slack
   proxy.ts               管理エリアの認証ガード（Next.js 16 の Proxy）
-public/                  地図・沿革・チームなどの画像
+public/                  会社案内・沿革などの写真
+scripts/                 画像の移行、ヒーロー地図のドット生成
 ```
 
 ## デプロイ

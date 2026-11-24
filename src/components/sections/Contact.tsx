@@ -21,6 +21,13 @@ const SERVICES = [
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
+/** 送信してからの流れ。フォームの上に置き、送った後に何が起きるかを示す。 */
+const FLOW = [
+  { title: "フォームを送信", body: "必要事項をご入力のうえ、送信してください。" },
+  { title: "担当者よりご連絡", body: "内容を確認し、担当者より折り返しご連絡いたします。" },
+  { title: "ヒアリング・ご提案", body: "ご要望を詳しく伺い、進め方とお見積もりをご提案します。" },
+];
+
 /**
  * useSearchParams はプリレンダリング時に Suspense 境界を必要とするため、
  * 中身を包んで公開する。呼び出し側は従来どおり `<Contact />` でよい。
@@ -163,10 +170,27 @@ function ContactForm({
       }
     >
       <div className="mx-auto max-w-3xl text-left">
-        <p className="text-base leading-relaxed text-ink-soft sm:text-lg">
-          プロジェクトのご相談、技術的なお悩み、既存システムの改善など、
-          どんな内容でもお気軽にどうぞ。担当者より折り返しご連絡いたします。
+        <p className="jp-phrase text-base leading-[2] text-ink-soft sm:text-lg">
+          プロジェクトのご相談、技術的なお悩み、既存システムの改善など、どんな内容でもお気軽にどうぞ。担当者より折り返しご連絡いたします。
         </p>
+
+        {/* お問い合わせの流れ。 */}
+        <ol className="mt-10 grid gap-3 sm:grid-cols-3">
+          {FLOW.map((f, i) => (
+            <li
+              key={f.title}
+              className="relative rounded-2xl border border-line bg-card p-5"
+            >
+              <p className="font-display text-[0.65rem] font-semibold tracking-[0.22em] text-accent-ink">
+                STEP {String(i + 1).padStart(2, "0")}
+              </p>
+              <p className="mt-1.5 text-base font-bold text-ink">{f.title}</p>
+              <p className="mt-1.5 text-xs leading-relaxed text-ink-soft sm:text-[0.8rem]">
+                {f.body}
+              </p>
+            </li>
+          ))}
+        </ol>
 
         <form
           ref={formRef}

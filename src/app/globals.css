@@ -1,16 +1,22 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   WEB-XR.studio design tokens — a saturated corporate blue over white.
-   The hero is a deep blue field carrying white copy; the page below it returns
-   to white with ink text, so the blue reads as a banner rather than a theme.
+   WEB-XR.studio design tokens.
 
-   Contrast rule for the blue field: only #1565d8 and darker clear AA for white
-   text (5.41:1). Anything lighter — #2f80e8 is 3.91 — fails, so the hero
-   gradient must not lighten past `--hero-to` where copy sits.
+   白地に青のコーポレートカラーを基本に、深いネイビーを「重さ」の色として
+   ヒーロー・強み・問い合わせ帯・フッターに敷く。白い面とネイビーの面を交互に
+   置き、ページ全体に緩急をつける。
 
-   --accent is the button fill; --accent-ink is the darker shade used whenever
-   the blue has to work as *text* (small labels, links) and needs AA contrast.
+   Contrast rules
+   - On white: --ink / --ink-soft / --muted all clear AA (≥ 5.9:1).
+   - On navy (--navy-900): white is 17:1, white/70 is 9:1, --cyan is 8.6:1.
+     Body copy on navy may go down to white/70, never lower.
+   - --accent (#0066ff) carries white text at 4.86:1 — fine for buttons.
+     When blue has to work as *text* on white, use --accent-ink (6.9:1).
+
+   管理画面も同じトークン（accent / surface / ink / line …）を使っているため、
+   これらの名前と値は変えない。公開サイト用の色は下の navy / cyan / violet に
+   追加している。
 --------------------------------------------------------------------------- */
 :root {
   --background: #ffffff;
@@ -24,17 +30,37 @@
   --accent: #0066ff;
   --accent-ink: #0052cc;
   --accent-hover: #0052cc;
-  /* Hero field: deep blue at the left where the copy sits, easing to a lighter
-     blue on the right behind the artwork. */
-  --hero-from: #0f56c4;
-  --hero-to: #1063c2;
-  /* Footer chrome — the same blue as the hero, so the page opens and closes on
-     one colour. Declared after `--hero-from` for readability; only pure white
-     clears AA on it, so footer text must stay solid `text-white`, never
-     `text-white/85`. */
-  --chrome: var(--hero-from);
-  --chrome-line: #2a72d4;
+
+  /* Deep navy — the weight of the site. */
+  --navy-950: #030a18;
+  --navy-900: #061430;
+  --navy-800: #0a1f45;
+  --navy-700: #12306a;
+  /* Signal colours used on navy only (glows, data, highlights). */
+  --cyan: #38bdf8;
+  --violet: #8b7bff;
+
+  /* Hero / page banner field and the footer chrome are the same navy, so the
+     page opens and closes on one colour. */
+  --hero-from: var(--navy-950);
+  --hero-to: var(--navy-800);
+  --chrome: var(--navy-900);
+  --chrome-line: rgb(255 255 255 / 0.12);
   --radius: 16px;
+
+  /* Font stacks. `--font-noto` / `--font-montserrat` are declared by
+     next/font on <html>; the system fonts behind them only show while the web
+     fonts load (or if they fail). */
+  --font-jp-stack:
+    var(--font-noto), "Hiragino Kaku Gothic ProN", "Hiragino Sans",
+    "Yu Gothic", YuGothic, Meiryo, sans-serif;
+  --font-display-stack:
+    var(--font-montserrat), var(--font-noto), "Helvetica Neue", Arial,
+    sans-serif;
+
+  /* Shared easing curves. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.18, 1);
 }
 
 @theme inline {
@@ -53,10 +79,14 @@
   --color-chrome-line: var(--chrome-line);
   --color-hero-from: var(--hero-from);
   --color-hero-to: var(--hero-to);
-  --font-sans:
-    "游ゴシック体", "Yu Gothic", YuGothic, "Hiragino Kaku Gothic Pro",
-    "ヒラギノ角ゴ Pro W3", "ヒラギノ角ゴ Pro", "メイリオ", "Meiryo", Osaka,
-    "ＭＳ Ｐゴシック", "Helvetica", "Verdana", sans-serif;
+  --color-navy-950: var(--navy-950);
+  --color-navy-900: var(--navy-900);
+  --color-navy-800: var(--navy-800);
+  --color-navy-700: var(--navy-700);
+  --color-cyan: var(--cyan);
+  --color-violet: var(--violet);
+  --font-sans: var(--font-jp-stack);
+  --font-display: var(--font-display-stack);
   --radius-brand: var(--radius);
 }
 
@@ -72,10 +102,37 @@ html {
 body {
   background: var(--background);
   color: var(--ink);
-  font-family: var(--font-sans);
+  font-family: var(--font-jp-stack);
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  line-height: 1.7;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+}
+
+/* Headings are set tighter than body copy. `palt` closes up the generous
+   default spacing of Japanese punctuation, which reads as loose at display
+   sizes. */
+h1,
+h2,
+h3,
+.font-display {
+  font-feature-settings: "palt" 1;
+  letter-spacing: 0.01em;
+}
+
+/* Japanese line breaking: break headings and lead copy between phrases
+   (文節) rather than mid-word, where the browser supports it. Long phrases
+   still wrap instead of overflowing. */
+h1,
+h2,
+h3,
+h4,
+.jp-phrase {
+  word-break: auto-phrase;
+  overflow-wrap: break-word;
+}
+p {
+  text-wrap: pretty;
 }
 
 /* The public site is intentionally light-only; do not invert in dark mode. */
@@ -84,23 +141,131 @@ body {
 }
 
 /* ---------------------------------------------------------------------------
-   Hero background — a light sky-blue wash, standing in until artwork is chosen.
-   A soft vertical gradient rather than a flat fill, so the hero settles into the
-   white page below it instead of ending on a hard band.
+   Navy field — hero and page banners.
 
-   The illustration that used to live here is gone; add one back by restoring a
-   `background-image` on this rule (and an aspect ratio on the section, which now
-   uses a plain min-height).
+   全ページ共通のネイビーの帯。ヘッダーはこのクラスの有無で白文字状態を切り
+   替えるため、トップ・下層を問わず必ず付与する。光のにじみ・格子・粒子は
+   各コンポーネントが重ねる。
 --------------------------------------------------------------------------- */
-/* 全ページ共通の青の帯。ヘッダーはこのクラスの有無で白文字状態を切り替える
-   ため、トップ・下層を問わず必ず付与する。 */
-.hero-bg {
-  background-image: linear-gradient(
-    115deg,
-    var(--hero-from) 0%,
-    var(--hero-from) 34%,
-    var(--hero-to) 100%
+/* `.navy-field` is the same paint for other dark surfaces (mobile menu, CTA
+   band). Only real page banners may carry `.hero-bg`: the header finds the
+   banner with `querySelector(".hero-bg")`. */
+.hero-bg,
+.navy-field {
+  background-color: var(--hero-from);
+  background-image:
+    radial-gradient(
+      70rem 42rem at 78% 18%,
+      rgb(0 102 255 / 0.34),
+      transparent 62%
+    ),
+    radial-gradient(
+      52rem 36rem at 6% 96%,
+      rgb(139 123 255 / 0.2),
+      transparent 64%
+    ),
+    linear-gradient(
+      160deg,
+      var(--hero-from) 0%,
+      var(--navy-900) 46%,
+      var(--hero-to) 100%
+    );
+}
+
+/* Engineering grid. A faint line grid that fades out towards the edges, so it
+   reads as texture rather than as a table. */
+.bg-grid-dark {
+  background-image:
+    linear-gradient(rgb(255 255 255 / 0.055) 1px, transparent 1px),
+    linear-gradient(90deg, rgb(255 255 255 / 0.055) 1px, transparent 1px);
+  background-size: 64px 64px;
+  -webkit-mask-image: radial-gradient(
+    ellipse 75% 70% at 55% 40%,
+    #000 20%,
+    transparent 78%
   );
+  mask-image: radial-gradient(
+    ellipse 75% 70% at 55% 40%,
+    #000 20%,
+    transparent 78%
+  );
+}
+
+/* Dot texture for light sections. */
+.bg-dots-light {
+  background-image: radial-gradient(
+    rgb(0 82 204 / 0.14) 1px,
+    transparent 1.5px
+  );
+  background-size: 22px 22px;
+}
+
+/* Aurora glows. Radial gradients rather than `filter: blur()` — they look the
+   same at this softness and cost nothing to animate. */
+.aurora {
+  position: absolute;
+  border-radius: 9999px;
+  pointer-events: none;
+  animation: aurora-drift 22s ease-in-out infinite alternate;
+}
+.aurora-blue {
+  background: radial-gradient(closest-side, rgb(0 102 255 / 0.45), transparent);
+}
+.aurora-cyan {
+  background: radial-gradient(
+    closest-side,
+    rgb(56 189 248 / 0.28),
+    transparent
+  );
+  animation-duration: 26s;
+  animation-delay: -6s;
+}
+.aurora-violet {
+  background: radial-gradient(
+    closest-side,
+    rgb(139 123 255 / 0.32),
+    transparent
+  );
+  animation-duration: 30s;
+  animation-delay: -12s;
+}
+@keyframes aurora-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(6%, -4%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-5%, 5%, 0) scale(0.96);
+  }
+}
+
+/* Decorative display text with a gradient fill. Used only on large English
+   words that repeat a visible Japanese heading. On white, the light end stays
+   at #2f80e8 (3.9:1) so even the palest part clears the 3:1 large-text
+   minimum. */
+.text-gradient {
+  background-image: linear-gradient(
+    100deg,
+    var(--navy-800) 0%,
+    var(--accent) 55%,
+    #2f80e8 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-gradient-light {
+  background-image: linear-gradient(
+    100deg,
+    #ffffff 0%,
+    #cfe4ff 45%,
+    var(--cyan) 100%
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
 /* ---------------------------------------------------------------------------
@@ -122,32 +287,357 @@ body {
     transform-origin 0s;
 }
 /* Entering: anchored left, so growing to scaleX(1) wipes in left-to-right. */
-.group:hover .nav-underline {
+.group:hover .nav-underline,
+.group[aria-current="page"] .nav-underline {
   transform: scaleX(1);
   transform-origin: left center;
   transition:
     transform 0.3s ease-out,
     transform-origin 0s;
 }
-@media (prefers-reduced-motion: reduce) {
-  .nav-underline,
-  .group:hover .nav-underline {
-    transition: none;
+
+/* ---------------------------------------------------------------------------
+   Scroll reveal.
+
+   `RevealObserver` adds `reveal-ready` to <html> once it is running and
+   `is-revealed` to each `[data-reveal]` element as it scrolls into view.
+   Without JavaScript neither class is ever set, so everything simply shows.
+   Elements already on screen when the observer starts are marked revealed
+   first, so nothing above the fold blinks out at hydration.
+
+   Put `data-reveal` on plain wrappers, not on elements that carry their own
+   transition or transform utilities — this rule would replace those.
+--------------------------------------------------------------------------- */
+[data-reveal] {
+  transition:
+    opacity 1s var(--ease-out-expo) var(--reveal-delay, 0ms),
+    transform 1.1s var(--ease-out-expo) var(--reveal-delay, 0ms),
+    clip-path 1.2s var(--ease-in-out-quart) var(--reveal-delay, 0ms);
+}
+html.reveal-ready [data-reveal]:not(.is-revealed) {
+  opacity: 0;
+  transform: translate3d(0, 36px, 0);
+}
+/* Image curtain: the frame wipes open left to right while the picture inside
+   settles from a slight zoom (see `.reveal-zoom`). */
+html.reveal-ready [data-reveal="mask"]:not(.is-revealed) {
+  opacity: 1;
+  transform: none;
+  clip-path: inset(0 100% 0 0);
+}
+[data-reveal="mask"] {
+  clip-path: inset(0 0 0 0);
+}
+[data-reveal="mask"] .reveal-zoom {
+  transition: transform 1.6s var(--ease-out-expo) var(--reveal-delay, 0ms);
+}
+html.reveal-ready [data-reveal="mask"]:not(.is-revealed) .reveal-zoom {
+  transform: scale(1.12);
+}
+/* A rule that draws itself (process timeline, dividers). */
+html.reveal-ready [data-reveal="line"]:not(.is-revealed) {
+  opacity: 1;
+  transform: scaleX(0);
+}
+[data-reveal="line"] {
+  transform-origin: left center;
+}
+
+/* ---------------------------------------------------------------------------
+   Hero entrance. Runs once on load from CSS alone, so the first view never
+   waits for hydration. Lines of the headline rise out of a clipping box.
+--------------------------------------------------------------------------- */
+.hero-line {
+  display: block;
+  overflow: hidden;
+  /* Room for descenders and the XR mark's ring inside the clip. */
+  padding-block: 0.08em;
+  margin-block: -0.08em;
+}
+.hero-line > span {
+  display: inline-block;
+  animation: hero-line-in 1.15s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+.hero-fade {
+  animation: hero-fade-in 1.1s var(--ease-out-expo) both;
+  animation-delay: var(--d, 0ms);
+}
+@keyframes hero-line-in {
+  from {
+    transform: translate3d(0, 110%, 0);
+  }
+  to {
+    transform: translate3d(0, 0, 0);
+  }
+}
+@keyframes hero-fade-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
   }
 }
 
-/* Utility: content fades up into place. The intro overlay that used to gate
-   this is gone, so `.reveal` is now simply a transition hook — sections are
-   visible from first paint. */
-.reveal {
-  opacity: 1;
-  transform: none;
-  transition:
-    opacity 0.7s ease,
-    transform 0.7s cubic-bezier(0.2, 0.7, 0.3, 1);
+/* Status dot: a soft beacon next to the hero's overline. */
+.beacon::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  animation: beacon 2.4s ease-out infinite;
 }
-/* モーダルの膜と中身。膜より中身をわずかに長くして、面が後から
-   追いついてくるように見せる。 */
+@keyframes beacon {
+  from {
+    transform: scale(1);
+    opacity: 0.7;
+  }
+  to {
+    transform: scale(3.2);
+    opacity: 0;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Japan network map (hero).
+--------------------------------------------------------------------------- */
+.map-in {
+  animation: map-in 1.8s var(--ease-out-expo) 0.35s both;
+}
+@keyframes map-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.map-twinkle-a {
+  animation: twinkle 3.2s ease-in-out infinite;
+}
+.map-twinkle-b {
+  animation: twinkle 4.6s ease-in-out -1.8s infinite;
+}
+@keyframes twinkle {
+  0%,
+  100% {
+    opacity: 0.15;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+/* Expanding ring around a location node. `transform-box` makes the scale
+   happen around the ring's own centre rather than the SVG origin. */
+.map-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: map-pulse 3s ease-out infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes map-pulse {
+  0% {
+    transform: scale(0.4);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(2.6);
+    opacity: 0;
+  }
+}
+/* Data packets travelling along the links: a short dash with a long gap,
+   shifted along the path. */
+.map-flow {
+  stroke-dasharray: 10 190;
+  animation: map-flow 4.5s linear infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes map-flow {
+  from {
+    stroke-dashoffset: 200;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.map-orbit {
+  transform-box: view-box;
+  transform-origin: 56% 52%;
+  animation: spin 90s linear infinite;
+}
+.map-orbit-rev {
+  transform-box: view-box;
+  transform-origin: 56% 52%;
+  animation: spin 140s linear infinite reverse;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Floating particles in dark fields. */
+.particle {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  border-radius: 9999px;
+  background: rgb(255 255 255 / 0.7);
+  animation: particle-rise var(--dur, 14s) linear infinite;
+  animation-delay: var(--d, 0s);
+}
+@keyframes particle-rise {
+  0% {
+    transform: translate3d(0, 0, 0);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translate3d(var(--dx, 0px), -40vh, 0);
+    opacity: 0;
+  }
+}
+
+/* Domain illustrations: LEDs blink, data runs along links, panels bob. */
+.art-blink {
+  animation: twinkle 2.4s ease-in-out infinite;
+  animation-delay: var(--d, 0s);
+}
+.art-flow {
+  stroke-dasharray: 8 120;
+  animation: map-flow 3.6s linear infinite;
+  animation-delay: var(--d, 0s);
+}
+.art-float {
+  animation: art-float 6s ease-in-out infinite alternate;
+  animation-delay: var(--d, 0s);
+}
+@keyframes art-float {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(0, -8px, 0);
+  }
+}
+
+/* "SCROLL" cue: a hairline with a light running down it. */
+.scroll-cue {
+  position: relative;
+  overflow: hidden;
+}
+.scroll-cue::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: -40%;
+  width: 100%;
+  height: 40%;
+  background: currentColor;
+  animation: scroll-cue 2.2s var(--ease-in-out-quart) infinite;
+}
+@keyframes scroll-cue {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(350%);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Marquee. The track holds two identical copies and slides by half its width,
+   so the loop is seamless. Paused on hover, on focus within, or by the
+   section's pause button (`data-paused`).
+--------------------------------------------------------------------------- */
+.marquee {
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 7%,
+    #000 93%,
+    transparent
+  );
+  mask-image: linear-gradient(
+    90deg,
+    transparent,
+    #000 7%,
+    #000 93%,
+    transparent
+  );
+}
+.marquee-track {
+  display: flex;
+  width: max-content;
+  animation: marquee var(--marquee-duration, 60s) linear infinite;
+}
+.marquee[data-reverse] .marquee-track {
+  animation-direction: reverse;
+}
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track,
+[data-paused] .marquee-track {
+  animation-play-state: paused;
+}
+@keyframes marquee {
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Carousel progress: the active dot fills over the autoplay interval.
+--------------------------------------------------------------------------- */
+.carousel-progress {
+  transform-origin: left center;
+  animation: carousel-progress var(--autoplay, 6s) linear both;
+}
+[data-paused] .carousel-progress {
+  animation-play-state: paused;
+}
+@keyframes carousel-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   FAQ accordion. Browsers that support animating to `auto` open the answer
+   smoothly; the rest simply toggle it.
+--------------------------------------------------------------------------- */
+.faq-item {
+  interpolate-size: allow-keywords;
+}
+.faq-item::details-content {
+  block-size: 0;
+  overflow: clip;
+  transition:
+    block-size 0.45s var(--ease-out-expo),
+    content-visibility 0.45s allow-discrete;
+}
+.faq-item[open]::details-content {
+  block-size: auto;
+}
+
+/* ---------------------------------------------------------------------------
+   Modals (existing). モーダルの膜と中身。膜より中身をわずかに長くして、面が
+   後から追いついてくるように見せる。
+--------------------------------------------------------------------------- */
 .modal-overlay {
   animation: modal-overlay-in 0.2s ease-out;
 }
@@ -235,11 +725,77 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Reduced motion: everything is shown in its final state and nothing loops.
+   Entrances that only fade are kept instant rather than removed, so content
+   is never left hidden.
+--------------------------------------------------------------------------- */
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;
   }
-  .reveal {
+  html.reveal-ready [data-reveal]:not(.is-revealed),
+  html.reveal-ready [data-reveal]:not(.is-revealed) .reveal-zoom {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
+  }
+  [data-reveal],
+  [data-reveal] .reveal-zoom {
+    transition: none;
+  }
+  .hero-line > span,
+  .hero-fade,
+  .map-in {
+    animation: none;
+  }
+  .aurora,
+  .beacon::after,
+  .map-twinkle-a,
+  .map-twinkle-b,
+  .map-pulse,
+  .map-flow,
+  .map-orbit,
+  .map-orbit-rev,
+  .particle,
+  .scroll-cue::after,
+  .carousel-progress,
+  .art-blink,
+  .art-flow,
+  .art-float {
+    animation: none;
+  }
+  .art-flow {
+    stroke-dasharray: none;
+    opacity: 0.3;
+  }
+  .map-pulse,
+  .particle {
+    opacity: 0;
+  }
+  .map-flow {
+    stroke-dasharray: none;
+    opacity: 0.25;
+  }
+  /* The marquee becomes a static, wrapped list. */
+  .marquee {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .marquee-track {
+    animation: none;
+    width: auto;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .marquee-copy {
+    display: none;
+  }
+  .nav-underline,
+  .group:hover .nav-underline {
+    transition: none;
+  }
+  .faq-item::details-content {
     transition: none;
   }
   /* 動きを減らす設定では拡大も移動もさせない。出現そのものは
@@ -255,12 +811,21 @@ body {
     animation: none;
     stroke-dasharray: none;
   }
-  /* 事例カードのホバー。浮き上がりと画像の拡大を止める。影と枠線の
+  /* カードのホバー。浮き上がりと画像の拡大を止める。影と枠線の
      変化は残すので、どのカードを指しているかは分かる。 */
   .group:hover {
     transform: none;
   }
-  .group:hover img {
+  .group:hover img,
+  .group:hover .hover-zoom {
     transform: none;
+  }
+}
+
+@media print {
+  html.reveal-ready [data-reveal]:not(.is-revealed) {
+    opacity: 1;
+    transform: none;
+    clip-path: none;
   }
 }

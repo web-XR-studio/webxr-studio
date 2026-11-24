@@ -7,18 +7,19 @@ import { cn } from "@/lib/utils";
  * 中央の1枚を強調し、左右を退色させて覗かせるカルーセル。
  *
  * カードの中身は `renderCard` に任せ、ここでは送りの仕組みだけを持つ。
- * トップページのチーム紹介とサービス紹介が共有している。
  *
- * 10秒ごとに自動で送るが、読んでいる最中に切り替わらないよう
- * ポインタが乗っている間とフォーカスがある間は止まる。
+ * 一定間隔で自動で送るが、読んでいる最中に切り替わらないよう、ポインタが
+ * 乗っている間とフォーカスがある間は止まる。止めるボタンも置く（自動で
+ * 動き続ける表示には、止める手段が要る — WCAG 2.2.2）。現在のドットは
+ * 次に送られるまでの残り時間を表す進捗バーになっている。
  */
 
 /** 中央カードに対する左右カードの縮小率と不透明度。 */
 const SIDE_SCALE = 0.88;
 const SIDE_OPACITY = 0.35;
 
-/** 自動送りの間隔の既定値。読ませる文量が多いカード向け。 */
-const AUTOPLAY_MS = 10_000;
+/** 自動送りの間隔の既定値。 */
+const AUTOPLAY_MS = 8_000;
 
 export function CardCarousel<T>({
   items,
@@ -27,23 +28,15 @@ export function CardCarousel<T>({
   /** React の key と、ドットの読み上げに使う。 */
   getKey,
   getLabel,
-  /** スクリーンリーダー向けのカルーセル名。例:「専門チーム」 */
+  /** スクリーンリーダー向けのカルーセル名。例:「お客様の事例」 */
   label,
-  /** 自動送りの間隔(ms)。文量の少ないカードは短くできる。 */
+  /** 自動送りの間隔(ms)。 */
   autoplayMs = AUTOPLAY_MS,
   /**
    * 中央カードの最大幅を決める Tailwind クラス。カードの中身が軽いものは
    * 既定より狭めて、画面を占めすぎないようにできる。
    */
   maxWidthClass = "max-w-3xl",
-  /**
-   * 矢印を置く、カード上端からの距離(px)。
-   *
-   * 中央（top-1/2）に置くとカードの高さに追従してしまい、送るたびに矢印が
-   * 上下に動く。文量はカードごとに違うので高さは揃わない。上端からの固定値に
-   * すれば、どのカードでも同じ位置に留まる。
-   */
-  arrowTop = 220,
 }: {
   items: T[];
   renderCard: (item: T, isCenter: boolean) => React.ReactNode;
@@ -52,17 +45,25 @@ export function CardCarousel<T>({
   label: string;
   autoplayMs?: number;
   maxWidthClass?: string;
-  arrowTop?: number;
 }) {
   const [index, setIndex] = useState(0);
-  // ポインタが乗っている / フォーカスがある間は自動送りを止める。読んでいる
-  // 最中に切り替わるのを防ぐため。
-  const [paused, setPaused] = useState(false);
+  // ポインタが乗っている / フォーカスがある間は自動送りを止める。
+  const [hovering, setHovering] = useState(false);
+  // 利用者がボタンで止めた状態。こちらは明示的に再開されるまで続く。
+  const [stopped, setStopped] = useState(false);
+  const [reduced, setReduced] = useState(false);
   const total = items.length;
+  const paused = hovering || stopped;
 
-  // 手動で送ったら、その時点から次の10秒を数え直す。切り替えた直後に自動送りが
-  // 来ると忙しないため。この値が変わるたびに下の useEffect がタイマーを張り直す。
+  // 手動で送ったら、その時点から次の間隔を数え直す。この値が変わるたびに
+  // 下の useEffect がタイマーを張り直し、進捗バーも最初から描き直す。
   const [tick, setTick] = useState(0);
+
+  useEffect(() => {
+    setReduced(
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+    );
+  }, []);
 
   const go = useCallback(
     (delta: number) => {
@@ -77,18 +78,25 @@ export function CardCarousel<T>({
     setTick((t) => t + 1);
   }, []);
 
+  // 一時停止から戻ったら、残り時間からではなく最初から数え直す。進捗バーも
+  // 描き直すので、バーと実際の送りの時期がずれない。
+  const wasPaused = useRef(paused);
   useEffect(() => {
-    // 1枚しかないなら送る意味がない。
-    if (paused || total <= 1) return;
-    // 「動きを減らす」設定の利用者には自動再生しない。
-    const reduced = window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
-    if (reduced) return;
+    if (wasPaused.current && !paused) setTick((t) => t + 1);
+    wasPaused.current = paused;
+  }, [paused]);
 
-    const id = setInterval(() => setIndex((i) => (i + 1) % total), autoplayMs);
-    return () => clearInterval(id);
-  }, [paused, total, tick, autoplayMs]);
+  useEffect(() => {
+    // 1枚しかないなら送る意味がない。「動きを減らす」設定でも自動では送らない。
+    if (paused || reduced || total <= 1) return;
+    // 1回ずつ張り直す setTimeout にして、tick（手動送り・再開）のたびに
+    // 間隔を数え直せるようにしている。
+    const id = setTimeout(() => {
+      setIndex((i) => (i + 1) % total);
+      setTick((t) => t + 1);
+    }, autoplayMs);
+    return () => clearTimeout(id);
+  }, [paused, reduced, total, tick, autoplayMs]);
 
   // 左右キーでも送れるようにする。カルーセルにフォーカスがあるときだけ拾う。
   const onKeyDown = (e: React.KeyboardEvent) => {
@@ -120,31 +128,29 @@ export function CardCarousel<T>({
 
   // items が減ったとき index が範囲外に残ることがあるので、参照前に丸める。
   const safeIndex = Math.min(index, total - 1);
+  const pad = (n: number) => String(n).padStart(2, "0");
 
   return (
     <div
-      className="relative mt-16"
+      className="relative"
       role="group"
       aria-roledescription="カルーセル"
       aria-label={label}
       tabIndex={0}
+      data-paused={paused || undefined}
       onKeyDown={onKeyDown}
       onTouchStart={onTouchStart}
       onTouchEnd={onTouchEnd}
       // 読んでいる間は自動送りを止める。onFocus/onBlur は子孫のフォーカスも
-      // 拾うので、矢印やドットを操作している間も止まる。
-      onMouseEnter={() => setPaused(true)}
-      onMouseLeave={() => setPaused(false)}
-      onFocus={() => setPaused(true)}
-      onBlur={() => setPaused(false)}
+      // 拾うので、ボタンやドットを操作している間も止まる。
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      onFocus={() => setHovering(true)}
+      onBlur={() => setHovering(false)}
     >
       {/* 中央カードだけをフローに置いて高さの基準にし、左右のカードは絶対配置で
-          その背後に覗かせる。こうしないと3枚ぶんの幅がコンテナを超えて、中央の
-          文字が切れてしまう。はみ出しは overflow-hidden で切る。
-
-          左右の padding は矢印と、覗かせる左右カードぶんの逃げ。狭い画面では
-          矢印をカードの下に回すため、逃げは要らない。 */}
-      <div className="overflow-hidden px-0 py-4 sm:px-16 lg:px-56">
+          その背後に覗かせる。はみ出しは overflow-hidden で切る。 */}
+      <div className="overflow-hidden px-0 py-6 lg:px-48">
         <div
           className={cn(
             "relative mx-auto flex items-stretch justify-center",
@@ -153,7 +159,7 @@ export function CardCarousel<T>({
         >
           {items.map((item, i) => {
             // 中央からの距離。-1 が左隣、1 が右隣。端はループさせる。
-            let offset = i - index;
+            let offset = i - safeIndex;
             if (offset > total / 2) offset -= total;
             if (offset < -total / 2) offset += total;
 
@@ -178,13 +184,12 @@ export function CardCarousel<T>({
                       }
                 }
                 className={cn(
-                  "border bg-card text-left transition-[transform,opacity] duration-300 ease-out",
+                  "overflow-hidden rounded-3xl border bg-card text-left transition-[transform,opacity] duration-500 ease-out",
                   isCenter
-                    ? "relative z-10 w-full border-line shadow-[0_18px_50px_rgb(13,16,23,0.12)]"
+                    ? "relative z-10 w-full border-line shadow-[0_30px_80px_rgb(0_45_120_/_0.14)]"
                     : cn(
                         // 中央カードの端に重ねて置き、外へずらして覗かせる。
-                        // 高さは中央より低くして、上下に収まるようにする。
-                        "pointer-events-none absolute top-8 bottom-8 hidden w-72 overflow-hidden border-line/60 lg:block",
+                        "pointer-events-none absolute bottom-10 top-10 hidden w-72 border-line/60 lg:block",
                         offset > 0 ? "right-0" : "left-0",
                       ),
                 )}
@@ -196,54 +201,95 @@ export function CardCarousel<T>({
         </div>
       </div>
 
-      {/* 送りボタンとドットを1行に。sm 以上では矢印だけをカードの左右端へ
-          絶対配置で逃がし、狭い画面ではドットと横並びのまま下に置く。 */}
-      <div className="mt-8 flex items-center justify-center gap-4">
-        <button
-          type="button"
-          onClick={() => go(-1)}
-          aria-label="前へ"
-          style={{ "--arrow-top": `${arrowTop}px` } as React.CSSProperties}
-          className="z-20 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-white shadow-lg transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 sm:absolute sm:left-0 sm:top-[var(--arrow-top)] sm:mt-0"
+      {/* 操作列: 位置（01 / 07）・進捗つきのドット・前後と一時停止。 */}
+      <div
+        className={cn(
+          "mx-auto mt-6 flex items-center justify-between gap-6",
+          maxWidthClass,
+        )}
+      >
+        <p
+          aria-hidden
+          className="w-20 font-display text-sm font-bold tabular-nums tracking-[0.12em] text-ink"
         >
-          <Chevron dir="left" />
-        </button>
+          {pad(safeIndex + 1)}
+          <span className="mx-1.5 text-muted">/</span>
+          <span className="text-muted">{pad(total)}</span>
+        </p>
 
         {/* 現在位置。点は押して直接移動もできる。 */}
-        <ul className="flex justify-center gap-2.5">
-          {items.map((item, i) => (
-            <li key={getKey(item)}>
-              <button
-                type="button"
-                onClick={() => jumpTo(i)}
-                aria-label={`${getLabel(item)}を表示`}
-                aria-current={i === index}
-                className={cn(
-                  "h-2.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2",
-                  i === index
-                    ? "w-8 bg-accent"
-                    : "w-2.5 bg-line hover:bg-muted",
-                )}
-              />
-            </li>
-          ))}
+        <ul className="hidden flex-1 items-center justify-center gap-2 sm:flex">
+          {items.map((item, i) => {
+            const active = i === safeIndex;
+            return (
+              <li key={getKey(item)}>
+                <button
+                  type="button"
+                  onClick={() => jumpTo(i)}
+                  aria-label={`${getLabel(item)}を表示`}
+                  aria-current={active}
+                  className={cn(
+                    "relative block h-1.5 overflow-hidden rounded-full transition-[width,background-color] duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2",
+                    active ? "w-12 bg-line" : "w-6 bg-line hover:bg-muted/50",
+                  )}
+                >
+                  {active && (
+                    <span
+                      // 送るたびに描き直す。
+                      key={`${safeIndex}-${tick}`}
+                      aria-hidden
+                      className="carousel-progress absolute inset-0 rounded-full bg-accent"
+                      style={
+                        { "--autoplay": `${autoplayMs}ms` } as React.CSSProperties
+                      }
+                    />
+                  )}
+                </button>
+              </li>
+            );
+          })}
         </ul>
 
-        <button
-          type="button"
-          onClick={() => go(1)}
-          aria-label="次へ"
-          style={{ "--arrow-top": `${arrowTop}px` } as React.CSSProperties}
-          className="z-20 flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-white shadow-lg transition-colors hover:bg-accent-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2 sm:absolute sm:right-0 sm:top-[var(--arrow-top)] sm:mt-0"
-        >
-          <Chevron dir="right" />
-        </button>
+        <div className="flex items-center gap-2">
+          {!reduced && total > 1 && (
+            <button
+              type="button"
+              onClick={() => setStopped((s) => !s)}
+              aria-label={stopped ? "自動送りを再開" : "自動送りを停止"}
+              className="flex h-11 w-11 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-accent-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            >
+              <svg viewBox="0 0 16 16" aria-hidden className="h-3.5 w-3.5" fill="currentColor">
+                {stopped ? (
+                  <path d="M4 2.5v11l9-5.5-9-5.5z" />
+                ) : (
+                  <path d="M4 2.5h2.6v11H4zM9.4 2.5H12v11H9.4z" />
+                )}
+              </svg>
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={() => go(-1)}
+            aria-label="前へ"
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-card text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2"
+          >
+            <Chevron dir="left" />
+          </button>
+          <button
+            type="button"
+            onClick={() => go(1)}
+            aria-label="次へ"
+            className="flex h-12 w-12 items-center justify-center rounded-full border border-line bg-card text-ink transition-colors duration-300 hover:border-accent hover:bg-accent hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 focus-visible:ring-offset-2"
+          >
+            <Chevron dir="right" />
+          </button>
+        </div>
       </div>
 
       {/* 読み上げ用。自動送りのたびに喋ると邪魔になるため、操作中（＝自動送りを
           止めている間）だけ通知する。 */}
       <p aria-live={paused ? "polite" : "off"} className="sr-only">
-        {`${index + 1} / ${total}　${getLabel(items[index])}`}
+        {`${safeIndex + 1} / ${total}　${getLabel(items[safeIndex])}`}
       </p>
     </div>
   );
@@ -257,7 +303,7 @@ function Chevron({ dir }: { dir: "left" | "right" }) {
       className="h-5 w-5"
       fill="none"
       stroke="currentColor"
-      strokeWidth={2.5}
+      strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
     >

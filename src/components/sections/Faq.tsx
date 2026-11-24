@@ -1,12 +1,18 @@
-import { Section } from "@/components/ui/Section";
+import { Section, SectionHeading } from "@/components/ui/Section";
 import type { Faq as FaqItem } from "@/db/schema";
 import { SectionLink } from "@/components/ui/SectionLink";
+import { revealDelay } from "@/lib/reveal";
+import { cn } from "@/lib/utils";
 
+/**
+ * よくある質問。<details> の開閉をそのまま使うので JS は要らない。
+ * 開閉の高さの動きは globals.css の "FAQ accordion"（対応ブラウザのみ）。
+ */
 export function Faq({
   faqs,
   /** /faq では PageHero が同じ見出しを出すため抑制する。 */
   showHeader = true,
-  /** 背景。トップページでは前後のセクションと交互になるよう白にする。 */
+  /** 背景。トップページでは前後のセクションと交互になるよう設定する。 */
   tone = "muted",
 }: {
   faqs: FaqItem[];
@@ -15,51 +21,82 @@ export function Faq({
 }) {
   if (faqs.length === 0) return null;
 
-  return (
-    <Section
-      id="faq"
-      align="center"
-      tone={tone}
-      eyebrow={showHeader ? "FAQ" : undefined}
-      title={showHeader ? "よくある質問" : undefined}
-      description={
-        showHeader
-          ? "お問い合わせの前に、よくいただくご質問をまとめました。"
-          : undefined
-      }
-    >
-      <div className="mx-auto max-w-3xl divide-y divide-line rounded-2xl border border-line bg-card">
-        {faqs.map((f) => (
-          <details
-            key={f.id}
-            className="group px-6 py-6 [&_summary::-webkit-details-marker]:hidden sm:px-8"
-          >
-            <summary className="flex cursor-pointer list-none items-center justify-between gap-4 text-lg font-semibold text-ink sm:text-xl">
-              {f.question}
-              <svg
-                viewBox="0 0 24 24"
-                width="20"
-                height="20"
-                className="shrink-0 text-muted transition-transform group-open:rotate-45"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                aria-hidden
-              >
-                <path d="M12 5v14M5 12h14" />
-              </svg>
-            </summary>
-            <p className="mt-3 text-base leading-relaxed text-ink-soft sm:text-lg">
-              {f.answer}
-            </p>
-          </details>
+  const list = (
+      <div className={cn("space-y-4", !showHeader && "mx-auto max-w-4xl")}>
+        {faqs.map((f, i) => (
+          <div key={f.id} data-reveal style={revealDelay(i % 6, 80)}>
+            <details className="faq-item group rounded-2xl border border-line bg-card transition-[border-color,box-shadow] duration-300 open:border-accent/40 open:shadow-[0_18px_50px_rgb(0_45_120_/_0.1)] hover:border-accent/30">
+              <summary className="flex cursor-pointer list-none items-center gap-4 px-5 py-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-accent/50 sm:gap-5 sm:px-8 sm:py-6 [&::-webkit-details-marker]:hidden">
+                <span
+                  aria-hidden
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent font-display text-base font-bold text-white"
+                >
+                  Q
+                </span>
+                <span className="flex-1 text-base font-bold leading-relaxed text-ink sm:text-lg">
+                  {f.question}
+                </span>
+                <span
+                  aria-hidden
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line text-ink-soft transition-[background-color,border-color,color,transform] duration-300 group-open:rotate-45 group-open:border-accent group-open:bg-accent group-open:text-white"
+                >
+                  <svg
+                    viewBox="0 0 24 24"
+                    className="h-4 w-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                  >
+                    <path d="M12 5v14M5 12h14" />
+                  </svg>
+                </span>
+              </summary>
+              <div className="flex gap-4 px-5 pb-6 sm:gap-5 sm:px-8 sm:pb-8">
+                <span
+                  aria-hidden
+                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface font-display text-base font-bold text-accent-ink"
+                >
+                  A
+                </span>
+                <p className="flex-1 border-t border-line pt-5 text-base leading-[2] text-ink-soft sm:text-[1.05rem]">
+                  {f.answer}
+                </p>
+              </div>
+            </details>
+          </div>
         ))}
       </div>
+  );
 
-      {/* /faq では自分自身へのリンクになるため出さない。 */}
-      {showHeader && (
-        <SectionLink href="/faq">よくある質問をすべて見る</SectionLink>
+  return (
+    <Section id="faq" tone={tone}>
+      {showHeader ? (
+        // トップページ: 左に見出しと一覧への導線（スクロールしても残す）、
+        // 右に質問。
+        <div className="grid gap-12 lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.5fr)] lg:gap-16">
+          <div className="lg:sticky lg:top-32 lg:self-start">
+            <SectionHeading
+              eyebrow="FAQ"
+              title="よくある質問"
+              description="お問い合わせの前に、よくいただくご質問をまとめました。"
+            />
+            <div className="hidden lg:block">
+              <SectionLink href="/faq" align="left">
+                よくある質問をすべて見る
+              </SectionLink>
+            </div>
+          </div>
+          <div>
+            {list}
+            <div className="lg:hidden">
+              <SectionLink href="/faq">よくある質問をすべて見る</SectionLink>
+            </div>
+          </div>
+        </div>
+      ) : (
+        // /faq: 見出しは PageHero が担うので、質問だけを中央に。
+        list
       )}
     </Section>
   );

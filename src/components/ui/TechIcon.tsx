@@ -73,11 +73,32 @@ export function TechIcon({
   );
 }
 
-/** A tech chip: logo (when one exists) plus the name. */
-export function TechChip({ name }: { name: string }) {
+/**
+ * A tech chip: logo (when one exists) plus the name.
+ * `size="sm"` is the compact pill used inside cards; `"lg"` is the larger
+ * pill of the technology marquee.
+ */
+export function TechChip({
+  name,
+  size = "md",
+}: {
+  name: string;
+  size?: "sm" | "md" | "lg";
+}) {
   return (
-    <li className="inline-flex items-center gap-2 border border-line bg-card px-3 py-1.5 text-sm text-ink-soft">
-      <TechIcon name={name} />
+    <li
+      className={cn(
+        "inline-flex shrink-0 items-center rounded-full border border-line bg-card text-ink-soft",
+        size === "sm" && "gap-1.5 px-2.5 py-1 text-xs",
+        size === "md" && "gap-2 px-3 py-1.5 text-sm",
+        size === "lg" &&
+          "gap-3 px-5 py-3 text-[0.95rem] font-medium text-ink shadow-[0_4px_18px_rgb(13_16_23_/_0.05)]",
+      )}
+    >
+      <TechIcon
+        name={name}
+        className={size === "lg" ? "h-5 w-5" : size === "sm" ? "h-3.5 w-3.5" : undefined}
+      />
       {name}
     </li>
   );

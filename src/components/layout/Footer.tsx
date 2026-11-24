@@ -2,63 +2,118 @@ import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import type { SiteSettings } from "@/db/schema";
 
-// Mirrors the header nav, plus 会社案内 which the sitemap also lists.
+// Mirrors the header nav (English label + Japanese reading).
 const NAV = [
-  { href: "/about", label: "私たちについて" },
-  { href: "/company", label: "会社案内" },
-  { href: "/service", label: "サービス" },
-  { href: "/case-study", label: "お客様事例" },
-  { href: "/faq", label: "よくある質問" },
-  { href: "/contact", label: "お問い合わせ" },
+  { href: "/", en: "HOME", label: "トップ" },
+  { href: "/about", en: "ABOUT US", label: "私たちについて" },
+  { href: "/company", en: "COMPANY", label: "会社案内" },
+  { href: "/service", en: "SERVICE", label: "サービス" },
+  { href: "/case-study", en: "CASE STUDY", label: "お客様事例" },
+  { href: "/faq", en: "FAQ", label: "よくある質問" },
+  { href: "/contact", en: "CONTACT", label: "お問い合わせ" },
 ];
 
+/**
+ * サイト共通のフッター。最も深いネイビーで締める。
+ *
+ * メールアドレスは出さない。問い合わせはフォームへ誘導する（設定値そのもの
+ * は残してあり、他の用途では使える）。
+ */
 export function Footer({ settings }: { settings: SiteSettings | null }) {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-chrome-line bg-chrome">
-      <div className="mx-auto w-full max-w-6xl px-5 py-12">
-        <div className="flex flex-col gap-8 md:flex-row md:justify-between md:gap-16">
-          <div className="max-w-sm">
-            <Logo href={null} className="text-white" />
-            <p className="mt-4 text-sm leading-relaxed text-white">
-              Web制作・システム開発・アプリ開発・AIソリューションを一気通貫で。
-              作って終わりではなく、育て続けるITパートナーです。
+    <footer className="relative isolate overflow-hidden bg-navy-950 text-white">
+      <div
+        aria-hidden
+        className="bg-grid-dark pointer-events-none absolute inset-0 -z-10 opacity-60"
+      />
+      <div className="mx-auto w-full max-w-6xl px-5 pb-10 pt-20">
+        <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)] lg:gap-20">
+          <div>
+            <Logo
+              href={null}
+              className="text-white"
+              markClassName="h-12 w-12"
+              nameClassName="text-xl"
+            />
+            <p className="jp-phrase mt-6 max-w-sm text-sm leading-[2] text-white/75">
+              Web制作・システム開発・アプリ開発・AIソリューションを一気通貫で。作って終わりではなく、育て続けるITパートナーです。
             </p>
-            {/* メールアドレスはフッターに出さない。問い合わせはフォームへ
-                誘導する（設定値そのものは残してあり、他の用途では使える）。 */}
-            {settings?.phone && (
-              <a
-                href={`tel:${settings.phone.replace(/[^\d+]/g, "")}`}
-                className="mt-1 block text-sm font-semibold text-white underline-offset-4 hover:underline"
-              >
-                {settings.phone}
-              </a>
+            {(settings?.address || settings?.phone) && (
+              <dl className="mt-8 space-y-3 text-sm">
+                {settings?.address && (
+                  <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3">
+                    <dt className="font-display text-xs font-semibold leading-6 tracking-[0.2em] text-cyan">
+                      ADDRESS
+                    </dt>
+                    <dd className="leading-6 text-white/85">
+                      {settings.address}
+                    </dd>
+                  </div>
+                )}
+                {settings?.phone && (
+                  <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-3">
+                    <dt className="font-display text-xs font-semibold leading-6 tracking-[0.2em] text-cyan">
+                      TEL
+                    </dt>
+                    <dd className="leading-6">
+                      <a
+                        href={`tel:${settings.phone.replace(/[^\d+]/g, "")}`}
+                        className="font-semibold text-white underline-offset-4 hover:underline"
+                      >
+                        {settings.phone}
+                      </a>
+                    </dd>
+                  </div>
+                )}
+              </dl>
             )}
           </div>
 
-          {/* サイトマップは横並び。縦に積むとフッターが背丈のぶんだけ
-              伸びるので、折り返しながら1〜2行に収める。 */}
-          <div className="text-sm">
-            <p className="mb-3 font-semibold text-white">サイトマップ</p>
-            <ul className="flex flex-wrap gap-x-6 gap-y-2">
+          <nav aria-label="サイトマップ">
+            <ul className="grid grid-cols-2 gap-x-8 gap-y-7 sm:grid-cols-3">
               {NAV.map((item) => (
                 <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className="text-white underline-offset-4 hover:underline"
-                  >
-                    {item.label}
+                  <Link href={item.href} className="group inline-block">
+                    <span className="block font-display text-[0.7rem] font-semibold tracking-[0.22em] text-white/55 transition-colors group-hover:text-cyan">
+                      {item.en}
+                    </span>
+                    <span className="mt-1 flex items-center gap-2 text-sm font-medium text-white">
+                      {item.label}
+                      <svg
+                        viewBox="0 0 20 20"
+                        aria-hidden
+                        className="h-3.5 w-3.5 -translate-x-1 opacity-0 transition-[opacity,transform] duration-300 group-hover:translate-x-0 group-hover:opacity-100"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth={2.4}
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M4 10h11M11 5l5 5-5 5" />
+                      </svg>
+                    </span>
                   </Link>
                 </li>
               ))}
             </ul>
-          </div>
+          </nav>
         </div>
 
-        <div className="mt-8 flex flex-col gap-2 border-t border-chrome-line pt-6 text-xs text-white sm:flex-row sm:items-center sm:justify-between">
+        {/* 社名を大きく敷いて締める。装飾なので読み上げない。 */}
+        <p
+          aria-hidden
+          className="mt-20 select-none whitespace-nowrap bg-gradient-to-b from-white/[0.14] to-white/[0.02] bg-clip-text font-display text-[min(8rem,calc((100vw_-_2.5rem)/8.9))] font-extrabold leading-none tracking-[-0.02em] text-transparent"
+        >
+          WEB-XR.studio
+        </p>
+
+        <div className="mt-8 flex flex-col gap-2 border-t border-white/10 pt-6 text-xs text-white/60 sm:flex-row sm:items-center sm:justify-between">
           <p>© {year} WEB-XR.studio. All rights reserved.</p>
-          {settings?.address && <p>{settings.address}</p>}
+          <p className="font-display tracking-[0.2em]">
+            WEB × SYSTEM × APP × AI
+          </p>
         </div>
       </div>
     </footer>

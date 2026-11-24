@@ -1,12 +1,19 @@
 import Link from "next/link";
 import { Section } from "@/components/ui/Section";
+import { ArrowIcon } from "@/components/ui/SectionLink";
+import {
+  DomainArt,
+  DomainIcon,
+  type DomainKind,
+} from "@/components/brand/DomainArt";
+import { revealDelay } from "@/lib/reveal";
 
 /**
  * SERVICE — the four development domains in depth.
  *
  * Editorial copy rather than DB-driven, so it lives here as a typed constant;
- * move it to a table if it ever needs to be admin-editable. The DB-backed
- * `Services` section still drives the short summary on the top page.
+ * move it to a table if it ever needs to be admin-editable. The top page's
+ * `Services` section summarises the same four domains as tiles.
  */
 
 export type Domain = {
@@ -18,8 +25,8 @@ export type Domain = {
   services: string[];
   /** Industry-specific project examples. */
   industries: { name: string; items: string[] }[];
-  /** Decorative banner behind the blue header band. */
-  image: string;
+  /** Which domain illustration / icon represents the domain. */
+  kind: DomainKind;
   /**
    * お問い合わせフォームの「対応サービス」に渡す値。
    * `Contact` の SERVICES と文字列が一致している必要がある。
@@ -35,7 +42,7 @@ export type Domain = {
 export const DOMAINS: Domain[] = [
   {
     en: "WEB DEVELOPMENT",
-    image: "/team/web.svg",
+    kind: "web",
     formService: "Web制作",
     slug: "web",
     title: "Webで「届ける」",
@@ -119,7 +126,7 @@ export const DOMAINS: Domain[] = [
   },
   {
     en: "SYSTEM DEVELOPMENT",
-    image: "/team/system.svg",
+    kind: "system",
     formService: "システム開発",
     slug: "system",
     title: "システムで「支える」",
@@ -198,7 +205,7 @@ export const DOMAINS: Domain[] = [
   },
   {
     en: "APP DEVELOPMENT",
-    image: "/team/app.svg",
+    kind: "app",
     formService: "アプリ開発",
     slug: "app",
     title: "アプリで「つなぐ」",
@@ -295,7 +302,7 @@ export const DOMAINS: Domain[] = [
   },
   {
     en: "AI DEVELOPMENT",
-    image: "/team/ai.svg",
+    kind: "ai",
     formService: "AI開発",
     slug: "ai",
     title: "AIで「進化させる」",
@@ -375,11 +382,11 @@ export const DOMAINS: Domain[] = [
 ];
 
 /** The four domains summarised for the closing one-stop block. */
-const ONE_STOP = [
-  { en: "Web", role: "集客・情報発信・顧客接点" },
-  { en: "System", role: "業務管理・データ・業務効率化" },
-  { en: "App", role: "顧客・社員・現場との接点" },
-  { en: "AI", role: "自動化・分析・予測・新しい価値" },
+const ONE_STOP: { en: string; kind: DomainKind; role: string }[] = [
+  { en: "Web", kind: "web", role: "集客・情報発信・顧客接点" },
+  { en: "System", kind: "system", role: "業務管理・データ・業務効率化" },
+  { en: "App", kind: "app", role: "顧客・社員・現場との接点" },
+  { en: "AI", kind: "ai", role: "自動化・分析・予測・新しい価値" },
 ];
 
 /** Checkmark used before every list item. */
@@ -388,7 +395,7 @@ function Tick() {
     <svg
       viewBox="0 0 20 20"
       aria-hidden
-      className="mt-[0.15em] h-4 w-4 shrink-0 text-accent"
+      className="mt-[0.2em] h-4 w-4 shrink-0 text-accent"
       fill="none"
       stroke="currentColor"
       strokeWidth={2.5}
@@ -397,6 +404,15 @@ function Tick() {
     >
       <path d="M4 10.5l4 4 8-9" />
     </svg>
+  );
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return (
+    <h4 className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-accent-ink">
+      <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+      {children}
+    </h4>
   );
 }
 
@@ -410,12 +426,14 @@ export function ServiceDetail({
     <>
       <Section
         id="services"
-        align="center"
         eyebrow={showHeader ? "SERVICE" : undefined}
         title={showHeader ? "サービス" : undefined}
       >
-        <div className="mx-auto max-w-3xl space-y-5 text-left text-base leading-relaxed text-ink-soft sm:text-lg">
-          <p>
+        <div
+          data-reveal
+          className="max-w-3xl space-y-5 text-base leading-[2.05] text-ink-soft sm:text-lg"
+        >
+          <p className="text-xl font-bold leading-relaxed text-ink sm:text-2xl">
             株式会社WEB-XR.studioは、Web制作・システム開発・アプリ開発・AI開発の4つの専門チームを擁しています。
           </p>
           <p>
@@ -423,104 +441,126 @@ export function ServiceDetail({
           </p>
         </div>
 
-        {/* カードだけ Section の max-w-6xl を超えて広げる。青帯が縦に伸びすぎ
-            ないよう、右カラムに業界カード3列ぶんの幅を確保するため。 */}
-        <div className="mt-16 space-y-16 text-left xl:-mx-[7rem] 2xl:-mx-[11rem]">
-          {DOMAINS.map((d) => (
+        {/* 4領域へのページ内リンク。 */}
+        <nav aria-label="サービス一覧" data-reveal className="mt-12">
+          <ul className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            {DOMAINS.map((d, i) => (
+              <li key={d.slug}>
+                <a
+                  href={`#${d.slug}`}
+                  className="group flex h-full items-center gap-4 rounded-2xl border border-line bg-card px-5 py-4 transition-[border-color,box-shadow] duration-300 hover:border-accent/40 hover:shadow-[0_12px_32px_rgb(0_45_120_/_0.1)]"
+                >
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface text-accent-ink transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
+                    <DomainIcon kind={d.kind} />
+                  </span>
+                  <span className="min-w-0">
+                    <span className="block font-display text-[0.65rem] font-semibold tracking-[0.18em] text-muted">
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span className="block text-sm font-bold text-ink sm:text-base">
+                      {d.title}
+                    </span>
+                  </span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* カードだけ Section の max-w-6xl を超えて広げる。右カラムに業界
+            カード3列ぶんの幅を確保するため。 */}
+        <div className="mt-20 space-y-12 text-left xl:-mx-[5rem] 2xl:-mx-[9rem]">
+          {DOMAINS.map((d, i) => (
             <article
               key={d.en}
               // トップページの「対応プロジェクトを見る」からの着地点。
               id={d.slug}
-              // 左に青の見出し帯、右に内容。狭い画面では縦積みに戻る。
-              // `items-stretch` で青帯が右カラムの高さいっぱいまで伸びる。
               // `scroll-mt` は固定ヘッダーぶんの逃げ。
-              className="grid scroll-mt-28 items-stretch border border-line bg-card lg:grid-cols-[minmax(0,0.8fr)_minmax(0,1.6fr)]"
+              className="scroll-mt-28"
             >
-              {/* 見出し帯。フッターと同じ青を敷き、文字は白に反転。背景に領域ごとの
-                  バナーを低い不透明度で重ねる（ABOUT US のチームカードと同じ手法）。
-                  内容は上下・左右とも中央に置く。 */}
-              <header className="relative isolate flex flex-col items-center justify-center bg-chrome p-8 text-center sm:p-10">
-                <div
-                  aria-hidden
-                  style={{ backgroundImage: `url(${d.image})` }}
-                  className="pointer-events-none absolute inset-0 -z-10 bg-cover bg-center opacity-25 mix-blend-luminosity"
-                />
-                <p className="text-base font-bold tracking-[0.18em] text-white/90 sm:text-lg">
-                  {d.en}
-                </p>
-                <h3 className="mt-2 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-                  {d.title}
-                </h3>
-                <p className="mt-5 text-lg leading-relaxed text-white sm:text-xl">
-                  {d.lead}
-                </p>
+              <div
+                data-reveal
+                className="grid items-stretch overflow-hidden rounded-3xl border border-line bg-card lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.6fr)]"
+              >
+                {/* 見出し帯。ネイビーの面に番号・英字・見出し・導入文と線画。 */}
+                <header className="navy-field relative isolate flex flex-col p-8 text-white sm:p-10">
+                  <div aria-hidden className="bg-grid-dark absolute inset-0 -z-10" />
+                  <div className="flex items-center gap-4">
+                    <span
+                      aria-hidden
+                      className="font-display text-5xl font-extrabold leading-none text-white/30"
+                    >
+                      {String(i + 1).padStart(2, "0")}
+                    </span>
+                    <span aria-hidden className="h-px flex-1 bg-white/15" />
+                  </div>
+                  <p className="mt-6 font-display text-xs font-semibold tracking-[0.24em] text-cyan">
+                    {d.en}
+                  </p>
+                  <h3 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
+                    {d.title}
+                  </h3>
+                  <p className="mt-5 text-base leading-[2] text-white/80 sm:text-lg">
+                    {d.lead}
+                  </p>
+                  <DomainArt kind={d.kind} className="mx-auto mt-8 max-w-sm" />
 
-                {/* 青帯の中に置くので、白地に青文字で最大の対比をとる。
-                    遷移先で対応サービスが選択済みになる。 */}
-                <Link
-                  href={`/contact?service=${encodeURIComponent(d.formService)}#service`}
-                  className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-white px-8 py-4 text-base font-bold tracking-tight text-chrome shadow-lg transition-colors hover:bg-white/90 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60 sm:w-auto sm:text-lg"
-                >
-                  このサービスを相談する
-                  <svg
-                    viewBox="0 0 20 20"
-                    aria-hidden
-                    className="h-5 w-5 shrink-0"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth={2.5}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
+                  {/* 遷移先で対応サービスが選択済みになる。 */}
+                  <Link
+                    href={`/contact?service=${encodeURIComponent(d.formService)}#service`}
+                    className="group/cta mt-8 inline-flex items-center justify-between gap-4 rounded-full bg-white py-2 pl-7 pr-2 text-base font-bold tracking-wide text-navy-900 transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60 lg:mt-auto"
                   >
-                    <path d="M4 10h11M10 5l5 5-5 5" />
-                  </svg>
-                </Link>
-              </header>
+                    このサービスを相談する
+                    <span
+                      aria-hidden
+                      className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white transition-transform duration-300 group-hover/cta:translate-x-0.5"
+                    >
+                      <ArrowIcon />
+                    </span>
+                  </Link>
+                </header>
 
-              <div className="space-y-10 p-6 sm:p-8">
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-muted">
-                    対応サービス
-                  </h4>
-                  <ul className="mt-4 grid gap-x-8 gap-y-2 sm:grid-cols-2 xl:grid-cols-3">
-                    {d.services.map((s) => (
-                      <li
-                        key={s}
-                        className="flex items-start gap-2 text-sm leading-relaxed text-ink-soft"
-                      >
-                        <Tick />
-                        {s}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
+                <div className="space-y-12 p-7 sm:p-10">
+                  <div>
+                    <Label>対応サービス</Label>
+                    <ul className="mt-5 grid gap-x-8 gap-y-2.5 sm:grid-cols-2 xl:grid-cols-3">
+                      {d.services.map((s) => (
+                        <li
+                          key={s}
+                          className="flex items-start gap-2.5 text-sm leading-relaxed text-ink-soft sm:text-[0.95rem]"
+                        >
+                          <Tick />
+                          {s}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
 
-                <div>
-                  <h4 className="text-xs font-bold uppercase tracking-[0.18em] text-muted">
-                    対応プロジェクト
-                  </h4>
-                  <div className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-                    {d.industries.map((ind) => (
-                      <div
-                        key={ind.name}
-                        className="border border-line bg-surface p-5"
-                      >
-                        <p className="text-sm font-bold tracking-tight text-accent-ink">
-                          {ind.name}
-                        </p>
-                        <ul className="mt-3 space-y-1.5">
-                          {ind.items.map((it) => (
-                            <li
-                              key={it}
-                              className="flex items-start gap-2 text-sm leading-relaxed text-ink-soft"
-                            >
-                              <Tick />
-                              {it}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                  <div>
+                    <Label>対応プロジェクト</Label>
+                    <div className="mt-5 grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+                      {d.industries.map((ind) => (
+                        <div
+                          key={ind.name}
+                          className="rounded-2xl border border-line bg-surface p-5 transition-[border-color,background-color] duration-300 hover:border-accent/40 hover:bg-card"
+                        >
+                          <p className="text-sm font-bold tracking-tight text-accent-ink">
+                            {ind.name}
+                          </p>
+                          <ul className="mt-3 space-y-1.5">
+                            {ind.items.map((it) => (
+                              <li
+                                key={it}
+                                className="flex items-start gap-2 text-sm leading-relaxed text-ink-soft"
+                              >
+                                <Tick />
+                                {it}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -531,33 +571,53 @@ export function ServiceDetail({
 
       <Section
         id="one-stop"
-        tone="muted"
+        tone="dark"
         align="center"
         eyebrow="ONE-STOP DEVELOPMENT"
         title="Web × System × App × AI"
+        description="私たちは、4つのサービスを個別に提供するだけではありません。Webサイトを入口として、業務システム、スマートフォンアプリ、AIまでを一つのプロジェクトとして設計・開発できます。"
+        backdrop={
+          <>
+            <div className="bg-grid-dark absolute inset-0" />
+            <div className="aurora aurora-blue -left-[10%] -top-[30%] h-[40rem] w-[40rem]" />
+            <div className="aurora aurora-violet -bottom-[40%] -right-[10%] h-[40rem] w-[40rem]" />
+          </>
+        }
       >
-        <div className="mx-auto max-w-3xl space-y-5 text-left text-base leading-relaxed text-ink-soft sm:text-lg">
-          <p>私たちは、4つのサービスを個別に提供するだけではありません。</p>
-          <p>
-            Webサイトを入口として、業務システム、スマートフォンアプリ、AIまでを一つのプロジェクトとして設計・開発できます。
-          </p>
-        </div>
-
-        <div className="mt-12 grid gap-4 text-left sm:grid-cols-2 lg:grid-cols-4">
-          {ONE_STOP.map((o) => (
-            <div key={o.en} className="border border-line bg-card p-6">
-              <p className="text-xl font-black tracking-tight text-accent-ink">
-                {o.en}
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-ink-soft">
-                → {o.role}
-              </p>
-            </div>
+        <ol className="grid gap-4 text-left sm:grid-cols-2 lg:grid-cols-4">
+          {ONE_STOP.map((o, i) => (
+            <li key={o.en} data-reveal style={revealDelay(i, 110)} className="relative">
+              <div className="h-full rounded-2xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur-sm">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan/15 text-cyan">
+                  <DomainIcon kind={o.kind} />
+                </span>
+                <p className="mt-6 font-display text-2xl font-extrabold tracking-tight">
+                  {o.en}
+                </p>
+                <p className="mt-2 text-sm leading-[1.9] text-white/75">
+                  {o.role}
+                </p>
+              </div>
+              {/* 領域どうしを「×」でつなぐ。最後の1枚の後ろには置かない。 */}
+              {i < ONE_STOP.length - 1 && (
+                <span
+                  aria-hidden
+                  className="absolute -right-[0.9rem] top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-cyan font-display text-sm font-bold text-navy-900 lg:flex"
+                >
+                  ×
+                </span>
+              )}
+            </li>
           ))}
-        </div>
+        </ol>
 
-        <p className="mx-auto mt-12 max-w-3xl text-left text-base leading-relaxed text-ink-soft sm:text-lg">
-          企業の「やりたいこと」を起点に、必要な技術を組み合わせ、最適なデジタルソリューションを提供します。
+        <p
+          data-reveal
+          className="mx-auto mt-14 max-w-3xl text-lg font-bold leading-[1.9] sm:text-xl"
+        >
+          企業の「やりたいこと」を起点に、必要な技術を組み合わせ、
+          <br className="hidden sm:block" />
+          最適なデジタルソリューションを提供します。
         </p>
       </Section>
     </>
