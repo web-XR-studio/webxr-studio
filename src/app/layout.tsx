@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Montserrat, Noto_Sans_JP } from "next/font/google";
 import { SITE_URL } from "@/lib/site";
+import { DEFAULT_THEME, THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
 
 // Self-hosted by next/font, so no request leaves for Google at runtime.
@@ -44,13 +45,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // `suppressHydrationWarning` guards against browser extensions that mutate
-    // <html> before React hydrates — a common source of spurious warnings.
+    // `suppressHydrationWarning` lets the theme script below (and browser
+    // extensions) change <html> attributes before React hydrates: React keeps
+    // what is in the DOM instead of reporting a mismatch.
     <html
       lang="ja"
+      data-theme={DEFAULT_THEME}
       className={`h-full antialiased ${noto.variable} ${montserrat.variable}`}
       suppressHydrationWarning
     >
+      <head>
+        {/* 保存済みの配色テーマを描画前に反映する。<head> で同期的に走るので、
+            既定のテーマが一瞬見えてから切り替わる「ちらつき」が起きない。 */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       {/* Extensions (Grammarly and similar) stamp attributes such as
           `bis_register` and `__processed_*` onto <body> before React hydrates,
           which React reports as a mismatch. Suppressing here covers this

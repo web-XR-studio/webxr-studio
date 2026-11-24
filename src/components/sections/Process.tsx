@@ -1,3 +1,12 @@
+import {
+  ClipboardList,
+  CodeXml,
+  MessagesSquare,
+  PencilRuler,
+  Rocket,
+  TrendingUp,
+  type LucideIcon,
+} from "lucide-react";
 import { Section } from "@/components/ui/Section";
 import { revealDelay } from "@/lib/reveal";
 
@@ -7,36 +16,42 @@ import { revealDelay } from "@/lib/reveal";
  * ご相談から運用までの6工程。広い画面では横一列に並べ、工程をつなぐ線が
  * 左から引かれていく。狭い画面では縦の時系列にする。
  */
-const STEPS = [
+const STEPS: { en: string; title: string; body: string; Icon: LucideIcon }[] = [
   {
     en: "HEARING",
     title: "ヒアリング",
     body: "事業の目的や現在の課題、実現したいことを伺います。",
+    Icon: MessagesSquare,
   },
   {
     en: "PROPOSAL",
     title: "ご提案・お見積もり",
     body: "最適な技術・体制・進め方をご提案し、お見積もりをお出しします。",
+    Icon: ClipboardList,
   },
   {
     en: "DESIGN",
     title: "要件定義・設計",
     body: "必要な機能や画面、データの構造を整理し、設計にまとめます。",
+    Icon: PencilRuler,
   },
   {
     en: "DEVELOPMENT",
     title: "デザイン・開発",
     body: "UI/UXデザインと開発を進め、動くものを確かめながら形にします。",
+    Icon: CodeXml,
   },
   {
     en: "RELEASE",
     title: "テスト・公開",
     body: "動作や品質を検証したうえで、本番環境に公開します。",
+    Icon: Rocket,
   },
   {
     en: "GROWTH",
     title: "運用・改善",
     body: "公開後も保守・運用と改善を続け、事業の成長を支えます。",
+    Icon: TrendingUp,
   },
 ];
 
@@ -46,7 +61,7 @@ export function Process() {
       id="process"
       eyebrow="PROCESS"
       title="開発の流れ"
-      description="ご相談から公開後の運用まで、ひとつのチームが一貫して伴走します。"
+      description="ご相談から公開後の運用まで、ひとつの窓口で一貫して伴走します。"
     >
       <div className="relative">
         {/* 工程をつなぐ線。広い画面は横、狭い画面は縦。 */}
@@ -61,30 +76,30 @@ export function Process() {
         />
 
         <ol className="relative grid gap-10 lg:grid-cols-6 lg:gap-5">
-          {STEPS.map((s, i) => (
+          {STEPS.map(({ en, title, body, Icon }, i) => (
             <li
-              key={s.en}
+              key={en}
               data-reveal
               style={revealDelay(i, 120)}
               className="flex gap-6 lg:block"
             >
-              <div className="group relative z-10 flex h-[4.5rem] w-[4.5rem] shrink-0 flex-col items-center justify-center rounded-full border border-line bg-card shadow-[0_10px_30px_rgb(0_45_120_/_0.1)]">
-                <span className="font-display text-[0.55rem] font-semibold tracking-[0.2em] text-muted">
-                  STEP
-                </span>
-                <span className="font-display text-xl font-extrabold leading-none text-accent-ink">
+              {/* 工程のアイコンを丸に収め、右上に番号を添える。 */}
+              <div className="group relative z-10 flex h-[4.5rem] w-[4.5rem] shrink-0 items-center justify-center rounded-full border border-line bg-card text-accent-ink shadow-[0_10px_30px_rgb(0_45_120_/_0.1)]">
+                <Icon aria-hidden strokeWidth={1.6} className="h-7 w-7" />
+                <span className="absolute -right-1.5 -top-1.5 flex h-7 min-w-7 items-center justify-center rounded-full bg-accent px-1.5 font-display text-[0.7rem] font-bold leading-none text-white ring-4 ring-background">
+                  <span className="sr-only">STEP </span>
                   {String(i + 1).padStart(2, "0")}
                 </span>
               </div>
               <div className="pt-2 lg:pt-0">
                 <p className="font-display text-[0.65rem] font-semibold tracking-[0.22em] text-accent-ink lg:mt-7">
-                  {s.en}
+                  {en}
                 </p>
                 <h3 className="mt-1.5 text-lg font-bold tracking-tight text-ink">
-                  {s.title}
+                  {title}
                 </h3>
                 <p className="mt-2.5 text-sm leading-[1.95] text-ink-soft">
-                  {s.body}
+                  {body}
                 </p>
               </div>
             </li>

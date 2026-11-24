@@ -15,7 +15,7 @@ export function SectionHeading({
   title,
   description,
   align = "left",
-  dark = false,
+  onStage = false,
   className,
 }: {
   /** 大きく見せる英字。例: "SERVICE" */
@@ -24,7 +24,8 @@ export function SectionHeading({
   title?: string;
   description?: string;
   align?: "left" | "center";
-  dark?: boolean;
+  /** ステージの面（ネイビー / 淡い青）の上に置くとき。 */
+  onStage?: boolean;
   className?: string;
 }) {
   const centered = align === "center";
@@ -35,7 +36,7 @@ export function SectionHeading({
           data-reveal="mask"
           className={cn(
             "inline-block break-words pb-1 font-display text-[2.5rem] font-extrabold uppercase leading-[1.02] tracking-[-0.01em] sm:text-6xl lg:text-7xl",
-            dark ? "text-gradient-light" : "text-gradient",
+            onStage ? "text-gradient-stage" : "text-gradient",
           )}
         >
           {eyebrow}
@@ -49,14 +50,14 @@ export function SectionHeading({
             "flex items-center gap-3 text-lg font-bold tracking-wide sm:text-xl",
             centered && "justify-center",
             eyebrow && "mt-4",
-            dark ? "text-white" : "text-ink",
+            onStage ? "text-on-stage" : "text-ink",
           )}
         >
           <span
             aria-hidden
             className={cn(
               "h-[3px] w-7 shrink-0 rounded-full",
-              dark ? "bg-cyan" : "bg-accent",
+              onStage ? "bg-stage-accent" : "bg-accent",
             )}
           />
           {title}
@@ -70,7 +71,7 @@ export function SectionHeading({
             "jp-phrase text-base leading-[1.95] sm:text-lg",
             (eyebrow || title) && "mt-6",
             centered && "mx-auto max-w-2xl",
-            dark ? "text-white/75" : "text-ink-soft",
+            onStage ? "text-on-stage/75" : "text-ink-soft",
           )}
         >
           {description}
@@ -86,7 +87,8 @@ export function SectionHeading({
  * tone
  * - "default": 白
  * - "muted":   淡い青グレー。白のセクションと交互に置いて区切りを作る
- * - "dark":    ネイビー。強み・数字など、ページの山場に使う
+ * - "stage":   ステージの面（ダークはネイビー、ライトは淡い青）。強み・
+ *              企業理念など、ページの山場に使う
  */
 export function Section({
   id,
@@ -105,13 +107,13 @@ export function Section({
   description?: string;
   children: ReactNode;
   className?: string;
-  tone?: "default" | "muted" | "dark";
+  tone?: "default" | "muted" | "stage";
   /** Header alignment. "center" also centers the header block itself. */
   align?: "left" | "center";
   /** セクションの背面に敷く装飾（光のにじみ・格子など）。 */
   backdrop?: ReactNode;
 }) {
-  const dark = tone === "dark";
+  const stage = tone === "stage";
   const hasHeader = Boolean(eyebrow || title || description);
 
   return (
@@ -121,7 +123,7 @@ export function Section({
         // scroll-mt clears the fixed header when an anchor link lands here.
         "relative isolate scroll-mt-20 px-5 py-24 sm:py-32",
         tone === "muted" && "bg-surface",
-        dark && "overflow-hidden bg-navy-900 text-white",
+        stage && "overflow-hidden bg-stage text-on-stage",
         className,
       )}
     >
@@ -140,7 +142,7 @@ export function Section({
             title={title}
             description={description}
             align={align}
-            dark={dark}
+            onStage={stage}
             className={cn(
               "mb-14 sm:mb-16",
               align === "center" ? "mx-auto max-w-3xl" : "max-w-3xl",

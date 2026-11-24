@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { PageHero } from "@/components/layout/PageHero";
 import { Section } from "@/components/ui/Section";
 import { clientLabel, Stack } from "@/components/sections/CaseStudies";
@@ -219,17 +220,10 @@ export default async function CaseStudyDetailPage({
                 aria-hidden
                 className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-white transition-colors duration-300 group-hover:bg-white group-hover:text-accent-ink"
               >
-                <svg
-                  viewBox="0 0 20 20"
-                  className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5"
-                  fill="none"
-                  stroke="currentColor"
+                <ArrowLeft
                   strokeWidth={2.4}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <path d="M16 10H5M9 5l-5 5 5 5" />
-                </svg>
+                  className="h-4 w-4 transition-transform duration-300 group-hover:-translate-x-0.5"
+                />
               </span>
               お客様事例の一覧へ
             </Link>

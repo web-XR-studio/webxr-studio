@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { ChevronLeft, ChevronRight, X, ZoomIn } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -220,18 +221,7 @@ function Viewer({
             aria-label="閉じる"
             className="inline-flex h-9 w-9 items-center justify-center transition-colors hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
           >
-            <svg
-              viewBox="0 0 24 24"
-              aria-hidden
-              width="20"
-              height="20"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={2}
-              strokeLinecap="round"
-            >
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
+            <X aria-hidden strokeWidth={2} className="h-5 w-5" />
           </button>
         </div>
       </div>
@@ -337,19 +327,7 @@ function Viewer({
               aria-label="前の画像"
               className="absolute left-4 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-ink/60 text-white backdrop-blur-sm transition-colors hover:bg-ink/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden
-                width="24"
-                height="24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 5l-7 7 7 7" />
-              </svg>
+              <ChevronLeft aria-hidden strokeWidth={2.5} className="h-6 w-6" />
             </button>
             <button
               type="button"
@@ -357,19 +335,7 @@ function Viewer({
               aria-label="次の画像"
               className="absolute right-4 top-1/2 z-10 inline-flex h-12 w-12 -translate-y-1/2 items-center justify-center rounded-full bg-ink/60 text-white backdrop-blur-sm transition-colors hover:bg-ink/85 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden
-                width="24"
-                height="24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 5l7 7-7 7" />
-              </svg>
+              <ChevronRight aria-hidden strokeWidth={2.5} className="h-6 w-6" />
             </button>
 
             <p className="absolute bottom-4 left-1/2 z-10 -translate-x-1/2 rounded-full bg-ink/60 px-4 py-1.5 text-sm text-white backdrop-blur-sm">
@@ -429,19 +395,7 @@ export function WorkGallery({
               aria-label="前の画像"
               className="absolute left-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-ink/45 text-white backdrop-blur-sm transition-colors hover:bg-ink/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden
-                width="22"
-                height="22"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M15 5l-7 7 7 7" />
-              </svg>
+              <ChevronLeft aria-hidden strokeWidth={2.5} className="h-[22px] w-[22px]" />
             </button>
             <button
               type="button"
@@ -449,19 +403,7 @@ export function WorkGallery({
               aria-label="次の画像"
               className="absolute right-3 top-1/2 z-10 inline-flex h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-ink/45 text-white backdrop-blur-sm transition-colors hover:bg-ink/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
             >
-              <svg
-                viewBox="0 0 24 24"
-                aria-hidden
-                width="22"
-                height="22"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth={2.5}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M9 5l7 7-7 7" />
-              </svg>
+              <ChevronRight aria-hidden strokeWidth={2.5} className="h-[22px] w-[22px]" />
             </button>
           </>
         )}
@@ -511,19 +453,7 @@ export function WorkGallery({
           className="inline-flex items-center gap-1.5 text-sm font-semibold text-accent-ink underline-offset-4 hover:underline"
         >
           拡大して見る
-          <svg
-            viewBox="0 0 20 20"
-            aria-hidden
-            className="h-3.5 w-3.5 shrink-0"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2.5}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="9" cy="9" r="5.5" />
-            <path d="M13 13l4 4M9 7v4M7 9h4" />
-          </svg>
+          <ZoomIn aria-hidden strokeWidth={2.4} className="h-4 w-4 shrink-0" />
         </button>
       </div>
 

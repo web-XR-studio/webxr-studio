@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { ArrowUpRight } from "lucide-react";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { getSiteSettings } from "@/lib/content";
 import { SectionLink } from "@/components/ui/SectionLink";
@@ -26,18 +27,7 @@ const REGISTRY = {
 /** 新しいタブで開くことを示すアイコン。説明は隣の sr-only テキストが担う。 */
 function ExternalIcon() {
   return (
-    <svg
-      viewBox="0 0 20 20"
-      aria-hidden
-      className="h-3.5 w-3.5 shrink-0"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M7 4h9v9M16 4L5 15" />
-    </svg>
+    <ArrowUpRight aria-hidden strokeWidth={2.4} className="h-4 w-4 shrink-0" />
   );
 }
 

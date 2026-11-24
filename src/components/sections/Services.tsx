@@ -1,7 +1,7 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Section } from "@/components/ui/Section";
 import { DOMAINS } from "@/components/sections/ServiceDetail";
-import { DomainArt } from "@/components/brand/DomainArt";
 import { ArrowIcon, SectionLink } from "@/components/ui/SectionLink";
 import { revealDelay } from "@/lib/reveal";
 
@@ -23,23 +23,32 @@ export function Services() {
       <ul className="grid gap-6 md:grid-cols-2">
         {DOMAINS.map((d, i) => (
           <li key={d.slug} data-reveal style={revealDelay(i % 2, 120)}>
-            <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-card transition-[transform,box-shadow,border-color] duration-500 ease-out hover:-translate-y-1.5 hover:border-accent/30 hover:shadow-[0_30px_70px_rgb(0_45_120_/_0.16)]">
-              {/* 線画の面。ホバーで絵がわずかに寄る。 */}
-              <div className="navy-field relative isolate overflow-hidden">
-                <div aria-hidden className="bg-grid-dark absolute inset-0 -z-10" />
-                <div className="px-10 pb-4 pt-14 sm:px-16">
-                  <DomainArt
-                    kind={d.kind}
-                    className="hover-zoom transition-transform duration-700 ease-out group-hover:scale-[1.05]"
-                  />
-                </div>
-                <p className="absolute left-7 top-6 flex items-center gap-3 font-display text-xs font-semibold tracking-[0.22em] text-white/85">
+            <article className="group flex h-full flex-col overflow-hidden rounded-3xl border border-line bg-card transition-[translate,box-shadow,border-color] duration-500 ease-out hover:-translate-y-1.5 hover:border-accent/30 hover:shadow-[0_30px_70px_rgb(0_45_120_/_0.16)]">
+              {/* 写真の面。ホバーで写真がわずかに寄る。上端の幕は番号と英字を
+                  読ませるため（テーマに依らず写真の上なので白文字）。 */}
+              <div className="relative aspect-[16/10] overflow-hidden bg-navy-900">
+                <Image
+                  src={d.image}
+                  alt=""
+                  fill
+                  sizes="(min-width: 1152px) 35rem, (min-width: 768px) 50vw, 100vw"
+                  placeholder="blur"
+                  className="hover-zoom object-cover transition-transform duration-700 ease-out group-hover:scale-[1.05]"
+                />
+                <div
+                  aria-hidden
+                  className="absolute inset-0 bg-gradient-to-b from-navy-950/75 via-navy-950/10 to-navy-950/30"
+                />
+                <p className="absolute left-7 top-6 flex items-center gap-3 font-display text-xs font-semibold tracking-[0.22em] text-white">
                   <span className="text-cyan">
                     {String(i + 1).padStart(2, "0")}
                   </span>
-                  <span aria-hidden className="h-px w-6 bg-white/30" />
+                  <span aria-hidden className="h-px w-6 bg-white/50" />
                   {d.en}
                 </p>
+                <span className="absolute bottom-5 right-5 flex h-12 w-12 items-center justify-center rounded-2xl bg-white/90 text-accent-ink shadow-[0_10px_30px_rgb(0_0_0_/_0.2)] backdrop-blur-sm transition-colors duration-500 group-hover:bg-accent group-hover:text-white">
+                  <d.Icon aria-hidden strokeWidth={1.7} className="h-6 w-6" />
+                </span>
               </div>
 
               <div className="flex flex-1 flex-col p-7 sm:p-9">

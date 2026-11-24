@@ -18,9 +18,10 @@ export const dynamic = "force-dynamic";
  * お客様事例 → よくある質問）の順に各ページの概要を置き、サービスの後ろに
  * 「選ばれる理由」「開発の流れ」「対応技術」を挟む。
  *
- * 背景は ネイビー（ヒーロー）→ 白 / 淡い青の交互 → ネイビー（強み）→ … →
- * ネイビー（問い合わせ帯）→ 最も深いネイビー（フッター）と切り替え、
- * ページ全体に緩急をつけている。
+ * 背景は ステージ（ヒーロー）→ 白 / 淡い青の交互 → ステージ（強み）→ … →
+ * ステージ（問い合わせ帯）→ 最も深いステージ（フッター）と切り替え、
+ * ページ全体に緩急をつけている。ステージの色は配色テーマで変わる（ダークは
+ * ネイビー、ライトは淡い青）。
  */
 export default async function HomePage() {
   const [company, portfolio, faqs] = await Promise.all([
@@ -31,7 +32,7 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* 相談の導線はヒーロー内の2つのボタンに集約している（ProjectMatch）。 */}
+      {/* 相談の入口（お問い合わせ）とサービス一覧への導線はヒーローの2つのボタン。 */}
       <Hero company={company} />
       <About variant="summary" />
       {/* 会社概要のみ。沿革と企業理念は /company に置く。 */}

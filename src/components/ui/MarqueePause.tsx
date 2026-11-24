@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Pause, Play } from "lucide-react";
 
 /**
  * 流れ続ける帯（marquee）に一時停止ボタンを添える。
@@ -26,13 +27,11 @@ export function MarqueePause({ children }: { children: React.ReactNode }) {
           aria-pressed={paused}
           className="inline-flex items-center gap-2 rounded-full border border-line bg-card px-4 py-2 text-xs font-semibold text-ink-soft transition-colors hover:border-accent/50 hover:text-accent-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
         >
-          <svg viewBox="0 0 16 16" aria-hidden className="h-3 w-3" fill="currentColor">
-            {paused ? (
-              <path d="M4 2.5v11l9-5.5-9-5.5z" />
-            ) : (
-              <path d="M4 2.5h2.6v11H4zM9.4 2.5H12v11H9.4z" />
-            )}
-          </svg>
+          {paused ? (
+            <Play aria-hidden fill="currentColor" className="h-3 w-3" />
+          ) : (
+            <Pause aria-hidden fill="currentColor" className="h-3 w-3" />
+          )}
           {paused ? "動きを再開する" : "動きを止める"}
         </button>
       </div>

@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CardCarousel } from "@/components/ui/CardCarousel";
+import { ArrowIcon } from "@/components/ui/SectionLink";
 import type { Portfolio } from "@/db/schema";
 
 /**
@@ -123,17 +124,7 @@ export function CaseStudyCarousel({ items }: { items: Portfolio[] }) {
                     aria-hidden
                     className="flex h-9 w-9 items-center justify-center rounded-full bg-accent text-white transition-colors duration-300 group-hover/btn:bg-white group-hover/btn:text-accent-ink"
                   >
-                    <svg
-                      viewBox="0 0 20 20"
-                      className="h-3.5 w-3.5"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth={2.4}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M4 10h11M11 5l5 5-5 5" />
-                    </svg>
+                    <ArrowIcon className="h-3.5 w-3.5" />
                   </span>
                 </Link>
               </div>

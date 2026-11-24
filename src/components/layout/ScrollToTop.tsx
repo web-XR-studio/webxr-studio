@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -114,18 +115,7 @@ export function ScrollToTop() {
         />
       </svg>
 
-      <svg
-        viewBox="0 0 20 20"
-        aria-hidden
-        className="relative h-5 w-5"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={2.5}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <path d="M10 16V5M5 10l5-5 5 5" />
-      </svg>
+      <ArrowUp aria-hidden strokeWidth={2.4} className="relative h-5 w-5" />
     </button>
   );
 }

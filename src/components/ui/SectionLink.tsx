@@ -1,22 +1,19 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-/** 右向き矢印。サイト内のリンク・ボタンで共通に使う。 */
+/**
+ * 右向き矢印（Lucide）。サイト内のリンク・ボタンで線の太さと大きさを
+ * 揃えるため、ここで包んで共通に使う。
+ */
 export function ArrowIcon({ className }: { className?: string }) {
   return (
-    <svg
-      viewBox="0 0 20 20"
+    <ArrowRight
       aria-hidden
-      className={cn("h-4 w-4 shrink-0", className)}
-      fill="none"
-      stroke="currentColor"
       strokeWidth={2.2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 10h11M11 5l5 5-5 5" />
-    </svg>
+      className={cn("h-4 w-4 shrink-0", className)}
+    />
   );
 }
 
@@ -24,7 +21,7 @@ export function ArrowIcon({ className }: { className?: string }) {
  * 「詳しく見る」系の導線。文字の右に丸い矢印を置き、ホバーで面と矢印の色が
  * 入れ替わる。
  *
- * tone="light" は白地用、"dark" はネイビー地用。
+ * tone="light" は白地用、"stage" はステージの面（ネイビー / 淡い青）用。
  */
 export function ArrowLink({
   href,
@@ -34,17 +31,17 @@ export function ArrowLink({
 }: {
   href: string;
   children: ReactNode;
-  tone?: "light" | "dark";
+  tone?: "light" | "stage";
   className?: string;
 }) {
-  const dark = tone === "dark";
+  const onStage = tone === "stage";
   return (
     <Link
       href={href}
       className={cn(
         "group/al inline-flex items-center gap-5 rounded-full border py-2 pl-7 pr-2 text-[0.95rem] font-bold tracking-wide transition-colors duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
-        dark
-          ? "border-white/25 text-white hover:border-white hover:bg-white hover:text-navy-900 focus-visible:ring-white/60 focus-visible:ring-offset-navy-900"
+        onStage
+          ? "border-on-stage/25 text-on-stage hover:border-stage-cta hover:bg-stage-cta hover:text-on-stage-cta focus-visible:ring-stage-accent/60 focus-visible:ring-offset-stage"
           : "border-ink/15 bg-card text-ink hover:border-accent hover:bg-accent hover:text-white focus-visible:ring-accent/50",
         className,
       )}
@@ -54,8 +51,8 @@ export function ArrowLink({
         aria-hidden
         className={cn(
           "flex h-10 w-10 items-center justify-center overflow-hidden rounded-full transition-colors duration-300",
-          dark
-            ? "bg-white text-navy-900 group-hover/al:bg-navy-900 group-hover/al:text-white"
+          onStage
+            ? "bg-stage-cta text-on-stage-cta group-hover/al:bg-on-stage-cta group-hover/al:text-stage-cta"
             : "bg-accent text-white group-hover/al:bg-white group-hover/al:text-accent-ink",
         )}
       >
@@ -83,7 +80,7 @@ export function SectionLink({
 }: {
   href: string;
   children: ReactNode;
-  tone?: "light" | "dark";
+  tone?: "light" | "stage";
   align?: "center" | "left";
 }) {
   return (

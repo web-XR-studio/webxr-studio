@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
   title: "サービス",
   description:
-    "Web制作・システム開発・アプリ開発・AI開発の4つの専門チームで、企画から運用まで一貫してご支援します。",
+    "Web制作・システム開発・アプリ開発・AI開発の4つの専門領域で、企画から運用まで一貫してご支援します。",
 };
 
 export default function ServicePage() {

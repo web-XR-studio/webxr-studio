@@ -1,23 +1,84 @@
 import { Section } from "@/components/ui/Section";
 import { TechChip } from "@/components/ui/TechIcon";
 import { MarqueePause } from "@/components/ui/MarqueePause";
-import { TEAMS } from "@/components/sections/About";
 import { cn } from "@/lib/utils";
 
 /**
- * TECHNOLOGY — 4つの専門チームが扱う技術を、左右に流れる2本の帯で見せる。
- *
- * 一覧はチーム紹介（About の TEAMS）の技術スタックから重複を除いて作る。
- * チームの技術を書き換えれば、ここも自動で追随する。
+ * TECHNOLOGY — 扱う技術を、左右に流れる2本の帯で見せる。
  *
  * ロゴ（simple-icons）はサーバーで描く。クライアントに読み込むとアイコン集
  * ごと送ることになり非常に重い。
  */
-const ALL = [...new Set(TEAMS.flatMap((t) => t.stack))];
+const TECHNOLOGIES = [
+  // Web
+  "HTML5",
+  "CSS3",
+  "SCSS",
+  "JavaScript",
+  "TypeScript",
+  "React",
+  "Next.js",
+  "Vue.js",
+  "Nuxt.js",
+  "WordPress",
+  "Shopify",
+  "Webflow",
+  "STUDIO",
+  "Figma",
+  "Adobe XD",
+  // System
+  "PHP",
+  "Laravel",
+  "Java",
+  "Spring Boot",
+  "C#",
+  ".NET",
+  "Python",
+  "Django",
+  "Ruby on Rails",
+  "Node.js",
+  "NestJS",
+  "PostgreSQL",
+  "MySQL",
+  "Redis",
+  "Docker",
+  "Kubernetes",
+  "AWS",
+  "Azure",
+  "Google Cloud",
+  // App
+  "Swift",
+  "Kotlin",
+  "Flutter",
+  "React Native",
+  "Dart",
+  "Firebase",
+  "Supabase",
+  "GraphQL",
+  "REST API",
+  // AI
+  "OpenAI",
+  "Claude",
+  "Gemini",
+  "LangChain",
+  "LangGraph",
+  "LlamaIndex",
+  "MCP",
+  "FastAPI",
+  "TensorFlow",
+  "PyTorch",
+  "Hugging Face",
+  "Pinecone",
+  "Weaviate",
+  "ChromaDB",
+  "Azure AI",
+  "Vertex AI",
+];
+
 // 交互に振り分けて、2本の帯に領域が偏らないようにする。
 const ROWS = [
-  ALL.filter((_, i) => i % 2 === 0),
-  ALL.filter((_, i) => i % 2 === 1),
+  TECHNOLOGIES.filter((_, i) => i % 2 === 0),
+  TECHNOLOGIES.filter((_, i) => i % 2 === 1),
 ];
 
 function Row({ items, reverse }: { items: string[]; reverse?: boolean }) {
@@ -54,7 +115,7 @@ export function TechStack() {
       tone="muted"
       eyebrow="TECHNOLOGY"
       title="対応技術"
-      description="4つの専門チームが扱う主な技術です。プロジェクトの目的や規模に合わせて、最適な組み合わせを選びます。"
+      description="Web・システム・アプリ・AIで扱う主な技術です。プロジェクトの目的や規模に合わせて、最適な組み合わせを選びます。"
     >
       <div data-reveal className="-mx-5 space-y-4 sm:mx-0">
         <MarqueePause>

@@ -1,12 +1,20 @@
+import Image, { type StaticImageData } from "next/image";
 import Link from "next/link";
+import {
+  BrainCircuit,
+  Check,
+  Globe,
+  Server,
+  Smartphone,
+  type LucideIcon,
+} from "lucide-react";
 import { Section } from "@/components/ui/Section";
 import { ArrowIcon } from "@/components/ui/SectionLink";
-import {
-  DomainArt,
-  DomainIcon,
-  type DomainKind,
-} from "@/components/brand/DomainArt";
 import { revealDelay } from "@/lib/reveal";
+import serviceWeb from "@/assets/photos/service-web.webp";
+import serviceSystem from "@/assets/photos/service-system.webp";
+import serviceApp from "@/assets/photos/service-app.webp";
+import serviceAi from "@/assets/photos/service-ai.webp";
 
 /**
  * SERVICE — the four development domains in depth.
@@ -25,8 +33,10 @@ export type Domain = {
   services: string[];
   /** Industry-specific project examples. */
   industries: { name: string; items: string[] }[];
-  /** Which domain illustration / icon represents the domain. */
-  kind: DomainKind;
+  /** 領域の写真（Unsplash、クレジットは README）。 */
+  image: StaticImageData;
+  /** 領域のアイコン（Lucide）。 */
+  Icon: LucideIcon;
   /**
    * お問い合わせフォームの「対応サービス」に渡す値。
    * `Contact` の SERVICES と文字列が一致している必要がある。
@@ -42,7 +52,8 @@ export type Domain = {
 export const DOMAINS: Domain[] = [
   {
     en: "WEB DEVELOPMENT",
-    kind: "web",
+    image: serviceWeb,
+    Icon: Globe,
     formService: "Web制作",
     slug: "web",
     title: "Webで「届ける」",
@@ -126,7 +137,8 @@ export const DOMAINS: Domain[] = [
   },
   {
     en: "SYSTEM DEVELOPMENT",
-    kind: "system",
+    image: serviceSystem,
+    Icon: Server,
     formService: "システム開発",
     slug: "system",
     title: "システムで「支える」",
@@ -205,7 +217,8 @@ export const DOMAINS: Domain[] = [
   },
   {
     en: "APP DEVELOPMENT",
-    kind: "app",
+    image: serviceApp,
+    Icon: Smartphone,
     formService: "アプリ開発",
     slug: "app",
     title: "アプリで「つなぐ」",
@@ -302,7 +315,8 @@ export const DOMAINS: Domain[] = [
   },
   {
     en: "AI DEVELOPMENT",
-    kind: "ai",
+    image: serviceAi,
+    Icon: BrainCircuit,
     formService: "AI開発",
     slug: "ai",
     title: "AIで「進化させる」",
@@ -382,28 +396,21 @@ export const DOMAINS: Domain[] = [
 ];
 
 /** The four domains summarised for the closing one-stop block. */
-const ONE_STOP: { en: string; kind: DomainKind; role: string }[] = [
-  { en: "Web", kind: "web", role: "集客・情報発信・顧客接点" },
-  { en: "System", kind: "system", role: "業務管理・データ・業務効率化" },
-  { en: "App", kind: "app", role: "顧客・社員・現場との接点" },
-  { en: "AI", kind: "ai", role: "自動化・分析・予測・新しい価値" },
+const ONE_STOP: { en: string; Icon: LucideIcon; role: string }[] = [
+  { en: "Web", Icon: Globe, role: "集客・情報発信・顧客接点" },
+  { en: "System", Icon: Server, role: "業務管理・データ・業務効率化" },
+  { en: "App", Icon: Smartphone, role: "顧客・社員・現場との接点" },
+  { en: "AI", Icon: BrainCircuit, role: "自動化・分析・予測・新しい価値" },
 ];
 
 /** Checkmark used before every list item. */
 function Tick() {
   return (
-    <svg
-      viewBox="0 0 20 20"
+    <Check
       aria-hidden
-      className="mt-[0.2em] h-4 w-4 shrink-0 text-accent"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2.5}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M4 10.5l4 4 8-9" />
-    </svg>
+      strokeWidth={2.6}
+      className="mt-[0.3em] h-4 w-4 shrink-0 text-accent"
+    />
   );
 }
 
@@ -434,7 +441,7 @@ export function ServiceDetail({
           className="max-w-3xl space-y-5 text-base leading-[2.05] text-ink-soft sm:text-lg"
         >
           <p className="text-xl font-bold leading-relaxed text-ink sm:text-2xl">
-            株式会社WEB-XR.studioは、Web制作・システム開発・アプリ開発・AI開発の4つの専門チームを擁しています。
+            株式会社WEB-XR.studioは、Web制作・システム開発・アプリ開発・AI開発の4つの専門領域を、ワンストップでご提供しています。
           </p>
           <p>
             Webサイトの制作から業務システム、スマートフォンアプリ、AIを活用した業務効率化まで、企業の課題や事業フェーズに合わせて最適なテクノロジーを組み合わせ、企画・設計・開発・運用まで一貫してサポートします。
@@ -451,7 +458,7 @@ export function ServiceDetail({
                   className="group flex h-full items-center gap-4 rounded-2xl border border-line bg-card px-5 py-4 transition-[border-color,box-shadow] duration-300 hover:border-accent/40 hover:shadow-[0_12px_32px_rgb(0_45_120_/_0.1)]"
                 >
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface text-accent-ink transition-colors duration-300 group-hover:bg-accent group-hover:text-white">
-                    <DomainIcon kind={d.kind} />
+                    <d.Icon aria-hidden strokeWidth={1.7} className="h-5 w-5" />
                   </span>
                   <span className="min-w-0">
                     <span className="block font-display text-[0.65rem] font-semibold tracking-[0.18em] text-muted">
@@ -482,38 +489,50 @@ export function ServiceDetail({
                 data-reveal
                 className="grid items-stretch overflow-hidden rounded-3xl border border-line bg-card lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.6fr)]"
               >
-                {/* 見出し帯。ネイビーの面に番号・英字・見出し・導入文と線画。 */}
-                <header className="navy-field relative isolate flex flex-col p-8 text-white sm:p-10">
-                  <div aria-hidden className="bg-grid-dark absolute inset-0 -z-10" />
+                {/* 見出し帯。ステージの面に番号・英字・見出し・導入文と写真。 */}
+                <header className="stage-field relative isolate flex flex-col p-8 text-on-stage sm:p-10">
+                  <div aria-hidden className="bg-grid absolute inset-0 -z-10" />
                   <div className="flex items-center gap-4">
                     <span
                       aria-hidden
-                      className="font-display text-5xl font-extrabold leading-none text-white/30"
+                      className="font-display text-5xl font-extrabold leading-none text-on-stage/30 light:text-accent/30"
                     >
                       {String(i + 1).padStart(2, "0")}
                     </span>
-                    <span aria-hidden className="h-px flex-1 bg-white/15" />
+                    <span aria-hidden className="h-px flex-1 bg-on-stage/15" />
+                    <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-stage-accent/15 text-stage-accent">
+                      <d.Icon aria-hidden strokeWidth={1.7} className="h-5 w-5" />
+                    </span>
                   </div>
-                  <p className="mt-6 font-display text-xs font-semibold tracking-[0.24em] text-cyan">
+                  <p className="mt-6 font-display text-xs font-semibold tracking-[0.24em] text-stage-accent">
                     {d.en}
                   </p>
                   <h3 className="mt-2 text-3xl font-black tracking-tight sm:text-4xl">
                     {d.title}
                   </h3>
-                  <p className="mt-5 text-base leading-[2] text-white/80 sm:text-lg">
+                  <p className="mt-5 text-base leading-[2] text-on-stage/80 sm:text-lg">
                     {d.lead}
                   </p>
-                  <DomainArt kind={d.kind} className="mx-auto mt-8 max-w-sm" />
+                  <div className="relative mt-8 aspect-[16/10] overflow-hidden rounded-2xl border border-on-stage/10 shadow-[0_20px_50px_rgb(0_0_0_/_0.25)] light:shadow-[0_20px_50px_rgb(0_45_120_/_0.14)]">
+                    <Image
+                      src={d.image}
+                      alt=""
+                      fill
+                      sizes="(min-width: 1280px) 30rem, (min-width: 1024px) 34vw, 90vw"
+                      placeholder="blur"
+                      className="object-cover"
+                    />
+                  </div>
 
                   {/* 遷移先で対応サービスが選択済みになる。 */}
                   <Link
                     href={`/contact?service=${encodeURIComponent(d.formService)}#service`}
-                    className="group/cta mt-8 inline-flex items-center justify-between gap-4 rounded-full bg-white py-2 pl-7 pr-2 text-base font-bold tracking-wide text-navy-900 transition-transform duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-white/60 lg:mt-auto"
+                    className="group/cta mt-8 inline-flex items-center justify-between gap-4 rounded-full bg-stage-cta py-2 pl-7 pr-2 text-base font-bold tracking-wide text-on-stage-cta transition-[translate] duration-300 hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stage-accent/50 lg:mt-auto"
                   >
                     このサービスを相談する
                     <span
                       aria-hidden
-                      className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white transition-transform duration-300 group-hover/cta:translate-x-0.5"
+                      className="flex h-11 w-11 items-center justify-center rounded-full bg-accent text-white transition-transform duration-300 group-hover/cta:translate-x-0.5 light:bg-white light:text-accent-ink"
                     >
                       <ArrowIcon />
                     </span>
@@ -571,14 +590,14 @@ export function ServiceDetail({
 
       <Section
         id="one-stop"
-        tone="dark"
+        tone="stage"
         align="center"
         eyebrow="ONE-STOP DEVELOPMENT"
         title="Web × System × App × AI"
         description="私たちは、4つのサービスを個別に提供するだけではありません。Webサイトを入口として、業務システム、スマートフォンアプリ、AIまでを一つのプロジェクトとして設計・開発できます。"
         backdrop={
           <>
-            <div className="bg-grid-dark absolute inset-0" />
+            <div className="bg-grid absolute inset-0" />
             <div className="aurora aurora-blue -left-[10%] -top-[30%] h-[40rem] w-[40rem]" />
             <div className="aurora aurora-violet -bottom-[40%] -right-[10%] h-[40rem] w-[40rem]" />
           </>
@@ -587,14 +606,14 @@ export function ServiceDetail({
         <ol className="grid gap-4 text-left sm:grid-cols-2 lg:grid-cols-4">
           {ONE_STOP.map((o, i) => (
             <li key={o.en} data-reveal style={revealDelay(i, 110)} className="relative">
-              <div className="h-full rounded-2xl border border-white/10 bg-white/[0.04] p-7 backdrop-blur-sm">
-                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan/15 text-cyan">
-                  <DomainIcon kind={o.kind} />
+              <div className="h-full rounded-2xl border border-on-stage/10 bg-stage-card p-7 backdrop-blur-sm light:border-line light:shadow-[0_10px_36px_rgb(0_45_120_/_0.07)]">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-stage-accent/15 text-stage-accent">
+                  <o.Icon aria-hidden strokeWidth={1.7} className="h-6 w-6" />
                 </span>
                 <p className="mt-6 font-display text-2xl font-extrabold tracking-tight">
                   {o.en}
                 </p>
-                <p className="mt-2 text-sm leading-[1.9] text-white/75">
+                <p className="mt-2 text-sm leading-[1.9] text-on-stage/75">
                   {o.role}
                 </p>
               </div>
@@ -602,7 +621,7 @@ export function ServiceDetail({
               {i < ONE_STOP.length - 1 && (
                 <span
                   aria-hidden
-                  className="absolute -right-[0.9rem] top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-cyan font-display text-sm font-bold text-navy-900 lg:flex"
+                  className="absolute -right-[0.9rem] top-1/2 z-10 hidden h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-stage-accent font-display text-sm font-bold text-stage lg:flex"
                 >
                   ×
                 </span>

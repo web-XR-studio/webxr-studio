@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Pause, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -258,13 +259,11 @@ export function CardCarousel<T>({
               aria-label={stopped ? "自動送りを再開" : "自動送りを停止"}
               className="flex h-11 w-11 items-center justify-center rounded-full text-ink-soft transition-colors hover:bg-surface hover:text-accent-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
             >
-              <svg viewBox="0 0 16 16" aria-hidden className="h-3.5 w-3.5" fill="currentColor">
-                {stopped ? (
-                  <path d="M4 2.5v11l9-5.5-9-5.5z" />
-                ) : (
-                  <path d="M4 2.5h2.6v11H4zM9.4 2.5H12v11H9.4z" />
-                )}
-              </svg>
+              {stopped ? (
+                <Play aria-hidden fill="currentColor" className="h-3.5 w-3.5" />
+              ) : (
+                <Pause aria-hidden fill="currentColor" className="h-3.5 w-3.5" />
+              )}
             </button>
           )}
           <button
@@ -296,18 +295,6 @@ export function CardCarousel<T>({
 }
 
 function Chevron({ dir }: { dir: "left" | "right" }) {
-  return (
-    <svg
-      viewBox="0 0 20 20"
-      aria-hidden
-      className="h-5 w-5"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d={dir === "left" ? "M12 5l-5 5 5 5" : "M8 5l5 5-5 5"} />
-    </svg>
-  );
+  const Icon = dir === "left" ? ChevronLeft : ChevronRight;
+  return <Icon aria-hidden strokeWidth={2} className="h-5 w-5" />;
 }

@@ -116,7 +116,7 @@ export function CaseStudies({
                 <Link
                   href={`/case-study/${item.id}`}
                   // ホバーで少し浮かせ、枠線を accent に寄せる。
-                  className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-line bg-card text-left transition-[transform,box-shadow,border-color] duration-500 ease-out hover:-translate-y-1.5 hover:border-accent/30 hover:shadow-[0_26px_60px_rgb(0_45_120_/_0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+                  className="group flex h-full w-full flex-col overflow-hidden rounded-3xl border border-line bg-card text-left transition-[translate,box-shadow,border-color] duration-500 ease-out hover:-translate-y-1.5 hover:border-accent/30 hover:shadow-[0_26px_60px_rgb(0_45_120_/_0.14)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
                 >
                   {/* 一覧のサムネイルはお客様のお写真。無ければサムネイル指定、
                       それも無ければ制作物画像を使い、いずれも無ければ既定の

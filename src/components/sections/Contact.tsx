@@ -2,6 +2,14 @@
 
 import { Suspense, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import {
+  ArrowRight,
+  CloudUpload,
+  Headset,
+  Presentation,
+  Send,
+  type LucideIcon,
+} from "lucide-react";
 import { Section } from "@/components/ui/Section";
 import { Button } from "@/components/ui/Button";
 import { Input, FieldGroup } from "@/components/ui/Field";
@@ -22,10 +30,10 @@ const SERVICES = [
 const MAX_FILE_BYTES = 50 * 1024 * 1024;
 
 /** 送信してからの流れ。フォームの上に置き、送った後に何が起きるかを示す。 */
-const FLOW = [
-  { title: "フォームを送信", body: "必要事項をご入力のうえ、送信してください。" },
-  { title: "担当者よりご連絡", body: "内容を確認し、担当者より折り返しご連絡いたします。" },
-  { title: "ヒアリング・ご提案", body: "ご要望を詳しく伺い、進め方とお見積もりをご提案します。" },
+const FLOW: { title: string; body: string; Icon: LucideIcon }[] = [
+  { title: "フォームを送信", body: "必要事項をご入力のうえ、送信してください。", Icon: Send },
+  { title: "担当者よりご連絡", body: "内容を確認し、担当者より折り返しご連絡いたします。", Icon: Headset },
+  { title: "ヒアリング・ご提案", body: "ご要望を詳しく伺い、進め方とお見積もりをご提案します。", Icon: Presentation },
 ];
 
 /**
@@ -181,9 +189,14 @@ function ContactForm({
               key={f.title}
               className="relative rounded-2xl border border-line bg-card p-5"
             >
-              <p className="font-display text-[0.65rem] font-semibold tracking-[0.22em] text-accent-ink">
-                STEP {String(i + 1).padStart(2, "0")}
-              </p>
+              <div className="flex items-center justify-between gap-3">
+                <p className="font-display text-[0.65rem] font-semibold tracking-[0.22em] text-accent-ink">
+                  STEP {String(i + 1).padStart(2, "0")}
+                </p>
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-accent/10 text-accent-ink">
+                  <f.Icon aria-hidden strokeWidth={1.8} className="h-[1.15rem] w-[1.15rem]" />
+                </span>
+              </div>
               <p className="mt-1.5 text-base font-bold text-ink">{f.title}</p>
               <p className="mt-1.5 text-xs leading-relaxed text-ink-soft sm:text-[0.8rem]">
                 {f.body}
@@ -339,18 +352,11 @@ function ContactForm({
                   </>
                 ) : (
                   <>
-                    <svg
-                      viewBox="0 0 24 24"
+                    <CloudUpload
                       aria-hidden
-                      className="h-6 w-6 text-muted"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.75"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M12 16V4M7 9l5-5 5 5M5 20h14" />
-                    </svg>
+                      strokeWidth={1.75}
+                      className="h-7 w-7 text-muted"
+                    />
                     <p className="mt-2 text-sm text-ink-soft">
                       ファイルをドラッグ、またはクリックして選択
                     </p>
@@ -413,18 +419,11 @@ function ContactForm({
                 ) : (
                   <>
                     送信する
-                    <svg
-                      viewBox="0 0 20 20"
+                    <ArrowRight
                       aria-hidden
-                      className="h-4 w-4 shrink-0"
-                      fill="none"
-                      stroke="currentColor"
                       strokeWidth={2.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M4 10h11M10 5l5 5-5 5" />
-                    </svg>
+                      className="h-4 w-4 shrink-0"
+                    />
                   </>
                 )}
               </Button>

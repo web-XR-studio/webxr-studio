@@ -3,20 +3,27 @@
 /* ---------------------------------------------------------------------------
    WEB-XR.studio design tokens.
 
-   白地に青のコーポレートカラーを基本に、深いネイビーを「重さ」の色として
-   ヒーロー・強み・問い合わせ帯・フッターに敷く。白い面とネイビーの面を交互に
-   置き、ページ全体に緩急をつける。
+   白地に青のコーポレートカラーを基本に、ヒーロー・強み・問い合わせ帯・
+   フッターなどの「ステージ」の面で緩急をつける。ステージの面は配色テーマで
+   塗りが変わる。
+
+   - ダーク（既定）: 深いネイビー。夜の東京の写真と合わせて重さを出す。
+   - ライト:         淡い青白。昼の東京の写真と合わせて明るく見せる。
+
+   テーマは <html data-theme="dark|light"> で切り替える（ルートレイアウトの
+   インラインスクリプトが、描画前に保存済みの選択を反映する）。
 
    Contrast rules
    - On white: --ink / --ink-soft / --muted all clear AA (≥ 5.9:1).
-   - On navy (--navy-900): white is 17:1, white/70 is 9:1, --cyan is 8.6:1.
-     Body copy on navy may go down to white/70, never lower.
+   - On the dark stage (navy-900): white is 17:1, white/70 is 9:1, --cyan is
+     8.6:1. Body copy on a stage may go down to on-stage/70, never lower.
+   - On the light stage (#eef4fc): ink/70 is 9:1, --accent-ink is 6.2:1.
    - --accent (#0066ff) carries white text at 4.86:1 — fine for buttons.
      When blue has to work as *text* on white, use --accent-ink (6.9:1).
 
    管理画面も同じトークン（accent / surface / ink / line …）を使っているため、
-   これらの名前と値は変えない。公開サイト用の色は下の navy / cyan / violet に
-   追加している。
+   これらの名前と値は変えない。テーマで変わるのはステージ系のトークンだけで、
+   管理画面はそれらを使っていない。
 --------------------------------------------------------------------------- */
 :root {
   --background: #ffffff;
@@ -31,22 +38,42 @@
   --accent-ink: #0052cc;
   --accent-hover: #0052cc;
 
-  /* Deep navy — the weight of the site. */
+  /* Deep navy — the weight of the dark theme. */
   --navy-950: #030a18;
   --navy-900: #061430;
   --navy-800: #0a1f45;
   --navy-700: #12306a;
-  /* Signal colours used on navy only (glows, data, highlights). */
+  /* Signal colours (glows, data, highlights). */
   --cyan: #38bdf8;
   --violet: #8b7bff;
-
-  /* Hero / page banner field and the footer chrome are the same navy, so the
-     page opens and closes on one colour. */
-  --hero-from: var(--navy-950);
-  --hero-to: var(--navy-800);
-  --chrome: var(--navy-900);
-  --chrome-line: rgb(255 255 255 / 0.12);
   --radius: 16px;
+
+  /* ---- Stage (dark theme, the default) --------------------------------- */
+  /* Flat stage surfaces: highlight sections, the footer. */
+  --stage: var(--navy-900);
+  --stage-deep: var(--navy-950);
+  /* Cards and cells that sit on a stage. */
+  --stage-card: rgb(255 255 255 / 0.04);
+  --stage-card-hover: rgb(10 31 69 / 0.8);
+  /* Text and hairlines on a stage; lines use on-stage/10–20. */
+  --on-stage: #ffffff;
+  /* Small highlights on a stage: labels, bars, icons. */
+  --stage-accent: var(--cyan);
+  /* The primary button on a stage. */
+  --stage-cta: #ffffff;
+  --on-stage-cta: var(--navy-900);
+  /* Gradient field behind the hero, page banners and the CTA band. */
+  --field-from: var(--navy-950);
+  --field-mid: var(--navy-900);
+  --field-to: var(--navy-800);
+  --field-glow-a: rgb(0 102 255 / 0.34);
+  --field-glow-b: rgb(139 123 255 / 0.2);
+  /* Textures and glows layered on the field. */
+  --grid-line: rgb(255 255 255 / 0.055);
+  --glow-blue: rgb(0 102 255 / 0.45);
+  --glow-cyan: rgb(56 189 248 / 0.28);
+  --glow-violet: rgb(139 123 255 / 0.32);
+  --particle: rgb(255 255 255 / 0.7);
 
   /* Font stacks. `--font-noto` / `--font-montserrat` are declared by
      next/font on <html>; the system fonts behind them only show while the web
@@ -63,6 +90,32 @@
   --ease-in-out-quart: cubic-bezier(0.77, 0, 0.18, 1);
 }
 
+/* ---- Stage (light theme) ------------------------------------------------ */
+[data-theme="light"] {
+  --stage: #eef4fc;
+  --stage-deep: #e6eef9;
+  --stage-card: #ffffff;
+  --stage-card-hover: #ffffff;
+  --on-stage: var(--ink);
+  --stage-accent: var(--accent-ink);
+  --stage-cta: var(--accent);
+  --on-stage-cta: #ffffff;
+  --field-from: #f8fbff;
+  --field-mid: #f0f5fd;
+  --field-to: #e4eefb;
+  --field-glow-a: rgb(0 102 255 / 0.12);
+  --field-glow-b: rgb(139 123 255 / 0.1);
+  --grid-line: rgb(10 31 69 / 0.06);
+  --glow-blue: rgb(0 102 255 / 0.16);
+  --glow-cyan: rgb(56 189 248 / 0.2);
+  --glow-violet: rgb(139 123 255 / 0.14);
+  --particle: rgb(0 102 255 / 0.4);
+}
+
+/* `light:` — styles that only apply in the light theme (photo blending, icon
+   swaps). Colours that simply follow the theme use the stage tokens instead. */
+@custom-variant light (&:where([data-theme="light"], [data-theme="light"] *));
+
 @theme inline {
   --color-background: var(--background);
   --color-surface: var(--surface);
@@ -75,16 +128,22 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
   --color-accent-hover: var(--accent-hover);
-  --color-chrome: var(--chrome);
-  --color-chrome-line: var(--chrome-line);
-  --color-hero-from: var(--hero-from);
-  --color-hero-to: var(--hero-to);
   --color-navy-950: var(--navy-950);
   --color-navy-900: var(--navy-900);
   --color-navy-800: var(--navy-800);
   --color-navy-700: var(--navy-700);
   --color-cyan: var(--cyan);
   --color-violet: var(--violet);
+  --color-stage: var(--stage);
+  --color-stage-deep: var(--stage-deep);
+  /* The base colour of the stage field, for veils that fade a photo into it. */
+  --color-field: var(--field-from);
+  --color-stage-card: var(--stage-card);
+  --color-stage-card-hover: var(--stage-card-hover);
+  --color-on-stage: var(--on-stage);
+  --color-stage-accent: var(--stage-accent);
+  --color-stage-cta: var(--stage-cta);
+  --color-on-stage-cta: var(--on-stage-cta);
   --font-sans: var(--font-jp-stack);
   --font-display: var(--font-display-stack);
   --radius-brand: var(--radius);
@@ -135,49 +194,48 @@ p {
   text-wrap: pretty;
 }
 
-/* The public site is intentionally light-only; do not invert in dark mode. */
+/* Both themes keep white content sections, so form controls and scrollbars
+   stay in their light rendering. */
 ::selection {
   background: color-mix(in srgb, var(--accent) 22%, transparent);
 }
 
 /* ---------------------------------------------------------------------------
-   Navy field — hero and page banners.
+   Stage field — hero, page banners, CTA band, mobile menu.
 
-   全ページ共通のネイビーの帯。ヘッダーはこのクラスの有無で白文字状態を切り
-   替えるため、トップ・下層を問わず必ず付与する。光のにじみ・格子・粒子は
-   各コンポーネントが重ねる。
+   ステージの面のグラデーション。ヘッダーはページ先頭の `.hero-bg` の有無で
+   透過表示に切り替えるため、ページの先頭の帯（トップのヒーロー・下層の
+   バナー）にだけ `.hero-bg` を付ける。それ以外の面は `.stage-field`。
+   光のにじみ・格子・粒子は各コンポーネントが重ねる。
 --------------------------------------------------------------------------- */
-/* `.navy-field` is the same paint for other dark surfaces (mobile menu, CTA
-   band). Only real page banners may carry `.hero-bg`: the header finds the
-   banner with `querySelector(".hero-bg")`. */
 .hero-bg,
-.navy-field {
-  background-color: var(--hero-from);
+.stage-field {
+  background-color: var(--field-from);
   background-image:
     radial-gradient(
       70rem 42rem at 78% 18%,
-      rgb(0 102 255 / 0.34),
+      var(--field-glow-a),
       transparent 62%
     ),
     radial-gradient(
       52rem 36rem at 6% 96%,
-      rgb(139 123 255 / 0.2),
+      var(--field-glow-b),
       transparent 64%
     ),
     linear-gradient(
       160deg,
-      var(--hero-from) 0%,
-      var(--navy-900) 46%,
-      var(--hero-to) 100%
+      var(--field-from) 0%,
+      var(--field-mid) 46%,
+      var(--field-to) 100%
     );
 }
 
 /* Engineering grid. A faint line grid that fades out towards the edges, so it
    reads as texture rather than as a table. */
-.bg-grid-dark {
+.bg-grid {
   background-image:
-    linear-gradient(rgb(255 255 255 / 0.055) 1px, transparent 1px),
-    linear-gradient(90deg, rgb(255 255 255 / 0.055) 1px, transparent 1px);
+    linear-gradient(var(--grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
   background-size: 64px 64px;
   -webkit-mask-image: radial-gradient(
     ellipse 75% 70% at 55% 40%,
@@ -191,7 +249,7 @@ p {
   );
 }
 
-/* Dot texture for light sections. */
+/* Dot texture for white sections. */
 .bg-dots-light {
   background-image: radial-gradient(
     rgb(0 82 204 / 0.14) 1px,
@@ -209,23 +267,15 @@ p {
   animation: aurora-drift 22s ease-in-out infinite alternate;
 }
 .aurora-blue {
-  background: radial-gradient(closest-side, rgb(0 102 255 / 0.45), transparent);
+  background: radial-gradient(closest-side, var(--glow-blue), transparent);
 }
 .aurora-cyan {
-  background: radial-gradient(
-    closest-side,
-    rgb(56 189 248 / 0.28),
-    transparent
-  );
+  background: radial-gradient(closest-side, var(--glow-cyan), transparent);
   animation-duration: 26s;
   animation-delay: -6s;
 }
 .aurora-violet {
-  background: radial-gradient(
-    closest-side,
-    rgb(139 123 255 / 0.32),
-    transparent
-  );
+  background: radial-gradient(closest-side, var(--glow-violet), transparent);
   animation-duration: 30s;
   animation-delay: -12s;
 }
@@ -245,7 +295,8 @@ p {
    words that repeat a visible Japanese heading. On white, the light end stays
    at #2f80e8 (3.9:1) so even the palest part clears the 3:1 large-text
    minimum. */
-.text-gradient {
+.text-gradient,
+[data-theme="light"] .text-gradient-stage {
   background-image: linear-gradient(
     100deg,
     var(--navy-800) 0%,
@@ -256,7 +307,9 @@ p {
   background-clip: text;
   color: transparent;
 }
-.text-gradient-light {
+/* The same words on a stage: white to cyan on navy; on the light stage it
+   falls back to the navy-to-blue fill above. */
+.text-gradient-stage {
   background-image: linear-gradient(
     100deg,
     #ffffff 0%,
@@ -294,6 +347,17 @@ p {
   transition:
     transform 0.3s ease-out,
     transform-origin 0s;
+}
+
+/* ---------------------------------------------------------------------------
+   Theme switch. The toggle wraps the change in a view transition and opens
+   the new theme as a circle from the button (see ThemeToggle). The default
+   cross-fade is switched off for that one transition only.
+--------------------------------------------------------------------------- */
+html.theme-switching::view-transition-old(root),
+html.theme-switching::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
 }
 
 /* ---------------------------------------------------------------------------
@@ -382,6 +446,62 @@ html.reveal-ready [data-reveal="line"]:not(.is-revealed) {
   }
 }
 
+/* Hero photograph: settles from a slight zoom on load, then drifts very
+   slowly, like a long camera move over the city. */
+.hero-photo {
+  animation:
+    hero-photo-in 2.4s var(--ease-out-expo) both,
+    hero-photo-drift 40s ease-in-out 2.4s infinite alternate;
+}
+@keyframes hero-photo-in {
+  from {
+    opacity: 0;
+    transform: scale(1.12);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+@keyframes hero-photo-drift {
+  from {
+    transform: scale(1.04) translate3d(0, 0, 0);
+  }
+  to {
+    transform: scale(1.1) translate3d(-1.5%, -1%, 0);
+  }
+}
+/* The veil over the hero photo. Narrow screens set the copy over the whole
+   picture, so the veil is even and deepens towards the bottom; wide screens
+   keep the copy side solid and let the city show on the right. The colour is
+   the stage's own: navy in the dark theme, near-white in the light one. */
+.hero-scrim {
+  --scrim: 3 10 24;
+  background: linear-gradient(
+    180deg,
+    rgb(var(--scrim) / 0.72) 0%,
+    rgb(var(--scrim) / 0.84) 45%,
+    rgb(var(--scrim) / 0.95) 100%
+  );
+}
+[data-theme="light"] .hero-scrim {
+  --scrim: 248 251 255;
+}
+@media (min-width: 1024px) {
+  .hero-scrim {
+    background:
+      linear-gradient(
+        90deg,
+        rgb(var(--scrim) / 1) 0%,
+        rgb(var(--scrim) / 0.94) 24%,
+        rgb(var(--scrim) / 0.55) 48%,
+        rgb(var(--scrim) / 0.12) 74%,
+        rgb(var(--scrim) / 0) 100%
+      ),
+      linear-gradient(0deg, rgb(var(--scrim) / 0.85) 0%, transparent 30%);
+  }
+}
+
 /* Status dot: a soft beacon next to the hero's overline. */
 .beacon::after {
   content: "";
@@ -402,93 +522,13 @@ html.reveal-ready [data-reveal="line"]:not(.is-revealed) {
   }
 }
 
-/* ---------------------------------------------------------------------------
-   Japan network map (hero).
---------------------------------------------------------------------------- */
-.map-in {
-  animation: map-in 1.8s var(--ease-out-expo) 0.35s both;
-}
-@keyframes map-in {
-  from {
-    opacity: 0;
-    transform: translate3d(0, 24px, 0) scale(0.97);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.map-twinkle-a {
-  animation: twinkle 3.2s ease-in-out infinite;
-}
-.map-twinkle-b {
-  animation: twinkle 4.6s ease-in-out -1.8s infinite;
-}
-@keyframes twinkle {
-  0%,
-  100% {
-    opacity: 0.15;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-/* Expanding ring around a location node. `transform-box` makes the scale
-   happen around the ring's own centre rather than the SVG origin. */
-.map-pulse {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: map-pulse 3s ease-out infinite;
-  animation-delay: var(--d, 0s);
-}
-@keyframes map-pulse {
-  0% {
-    transform: scale(0.4);
-    opacity: 0.9;
-  }
-  100% {
-    transform: scale(2.6);
-    opacity: 0;
-  }
-}
-/* Data packets travelling along the links: a short dash with a long gap,
-   shifted along the path. */
-.map-flow {
-  stroke-dasharray: 10 190;
-  animation: map-flow 4.5s linear infinite;
-  animation-delay: var(--d, 0s);
-}
-@keyframes map-flow {
-  from {
-    stroke-dashoffset: 200;
-  }
-  to {
-    stroke-dashoffset: 0;
-  }
-}
-.map-orbit {
-  transform-box: view-box;
-  transform-origin: 56% 52%;
-  animation: spin 90s linear infinite;
-}
-.map-orbit-rev {
-  transform-box: view-box;
-  transform-origin: 56% 52%;
-  animation: spin 140s linear infinite reverse;
-}
-@keyframes spin {
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Floating particles in dark fields. */
+/* Floating particles in stage fields. */
 .particle {
   position: absolute;
   width: 2px;
   height: 2px;
   border-radius: 9999px;
-  background: rgb(255 255 255 / 0.7);
+  background: var(--particle);
   animation: particle-rise var(--dur, 14s) linear infinite;
   animation-delay: var(--d, 0s);
 }
@@ -506,29 +546,6 @@ html.reveal-ready [data-reveal="line"]:not(.is-revealed) {
   100% {
     transform: translate3d(var(--dx, 0px), -40vh, 0);
     opacity: 0;
-  }
-}
-
-/* Domain illustrations: LEDs blink, data runs along links, panels bob. */
-.art-blink {
-  animation: twinkle 2.4s ease-in-out infinite;
-  animation-delay: var(--d, 0s);
-}
-.art-flow {
-  stroke-dasharray: 8 120;
-  animation: map-flow 3.6s linear infinite;
-  animation-delay: var(--d, 0s);
-}
-.art-float {
-  animation: art-float 6s ease-in-out infinite alternate;
-  animation-delay: var(--d, 0s);
-}
-@keyframes art-float {
-  from {
-    transform: translate3d(0, 0, 0);
-  }
-  to {
-    transform: translate3d(0, -8px, 0);
   }
 }
 
@@ -746,36 +763,18 @@ html.reveal-ready [data-reveal="line"]:not(.is-revealed) {
   }
   .hero-line > span,
   .hero-fade,
-  .map-in {
+  .hero-photo {
     animation: none;
   }
   .aurora,
   .beacon::after,
-  .map-twinkle-a,
-  .map-twinkle-b,
-  .map-pulse,
-  .map-flow,
-  .map-orbit,
-  .map-orbit-rev,
   .particle,
   .scroll-cue::after,
-  .carousel-progress,
-  .art-blink,
-  .art-flow,
-  .art-float {
+  .carousel-progress {
     animation: none;
   }
-  .art-flow {
-    stroke-dasharray: none;
-    opacity: 0.3;
-  }
-  .map-pulse,
   .particle {
     opacity: 0;
-  }
-  .map-flow {
-    stroke-dasharray: none;
-    opacity: 0.25;
   }
   /* The marquee becomes a static, wrapped list. */
   .marquee {

@@ -1,3 +1,4 @@
+import { Plus } from "lucide-react";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import type { Faq as FaqItem } from "@/db/schema";
 import { SectionLink } from "@/components/ui/SectionLink";
@@ -38,18 +39,9 @@ export function Faq({
                 </span>
                 <span
                   aria-hidden
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line text-ink-soft transition-[background-color,border-color,color,transform] duration-300 group-open:rotate-45 group-open:border-accent group-open:bg-accent group-open:text-white"
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-line text-ink-soft transition-[background-color,border-color,color,rotate] duration-300 group-open:rotate-45 group-open:border-accent group-open:bg-accent group-open:text-white"
                 >
-                  <svg
-                    viewBox="0 0 24 24"
-                    className="h-4 w-4"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                  >
-                    <path d="M12 5v14M5 12h14" />
-                  </svg>
+                  <Plus strokeWidth={2} className="h-4 w-4" />
                 </span>
               </summary>
               <div className="flex gap-4 px-5 pb-6 sm:gap-5 sm:px-8 sm:pb-8">

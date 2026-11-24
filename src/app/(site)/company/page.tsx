@@ -38,13 +38,13 @@ export default async function CompanyPage() {
           ビジョンは対応する項目がないためこのページの定数。 */}
       <Section
         id="philosophy"
-        tone="dark"
+        tone="stage"
         align="center"
         eyebrow="PHILOSOPHY"
         title="企業理念"
         backdrop={
           <>
-            <div className="bg-grid-dark absolute inset-0" />
+            <div className="bg-grid absolute inset-0" />
             <div className="aurora aurora-blue -left-[10%] -top-[30%] h-[40rem] w-[40rem]" />
             <div className="aurora aurora-violet -bottom-[40%] -right-[10%] h-[40rem] w-[40rem]" />
           </>
@@ -53,12 +53,12 @@ export default async function CompanyPage() {
         <div className="mx-auto grid max-w-5xl gap-6 text-left md:grid-cols-2">
           <div
             data-reveal
-            className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 backdrop-blur-sm sm:p-12"
+            className="rounded-3xl border border-on-stage/10 bg-stage-card p-8 backdrop-blur-sm sm:p-12 light:border-line light:shadow-[0_12px_40px_rgb(0_45_120_/_0.07)]"
           >
-            <p className="font-display text-sm font-semibold tracking-[0.26em] text-cyan">
+            <p className="font-display text-sm font-semibold tracking-[0.26em] text-stage-accent">
               VISION
             </p>
-            <h3 className="mt-2 text-base font-bold text-white/80">ビジョン</h3>
+            <h3 className="mt-2 text-base font-bold text-on-stage/80">ビジョン</h3>
             <p className="mt-6 text-xl font-black leading-[1.75] sm:text-2xl">
               {VISION}
             </p>
@@ -68,12 +68,12 @@ export default async function CompanyPage() {
             <div
               data-reveal
               style={{ "--reveal-delay": "120ms" } as React.CSSProperties}
-              className="rounded-3xl border border-white/10 bg-white/[0.04] p-8 backdrop-blur-sm sm:p-12"
+              className="rounded-3xl border border-on-stage/10 bg-stage-card p-8 backdrop-blur-sm sm:p-12 light:border-line light:shadow-[0_12px_40px_rgb(0_45_120_/_0.07)]"
             >
-              <p className="font-display text-sm font-semibold tracking-[0.26em] text-cyan">
+              <p className="font-display text-sm font-semibold tracking-[0.26em] text-stage-accent">
                 MISSION
               </p>
-              <h3 className="mt-2 text-base font-bold text-white/80">
+              <h3 className="mt-2 text-base font-bold text-on-stage/80">
                 ミッション
               </h3>
               <p className="mt-6 whitespace-pre-line text-xl font-black leading-[1.75] sm:text-2xl">

@@ -1,8 +1,12 @@
 import { Fragment } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { Mail } from "lucide-react";
 import { XrMark } from "@/components/brand/XrMark";
-import { ProjectMatch } from "@/components/sections/ProjectMatch";
-import { JapanNetwork } from "@/components/sections/hero/JapanNetwork";
+import { ArrowIcon } from "@/components/ui/SectionLink";
 import type { Company } from "@/db/schema";
+import tokyoNight from "@/assets/photos/tokyo-night.webp";
+import tokyoDay from "@/assets/photos/tokyo-day.webp";
 
 /**
  * Renders the tagline with every literal "XR" replaced by the brand mark.
@@ -41,7 +45,7 @@ const PARTICLES = (() => {
     seed = (seed * 16807) % 2147483647;
     return (seed - 1) / 2147483646;
   };
-  return Array.from({ length: 26 }, () => ({
+  return Array.from({ length: 22 }, () => ({
     left: `${(rand() * 100).toFixed(2)}%`,
     top: `${(40 + rand() * 60).toFixed(2)}%`,
     d: `${(-rand() * 16).toFixed(2)}s`,
@@ -55,24 +59,52 @@ function delay(ms: number) {
   return { "--d": `${ms}ms` } as React.CSSProperties;
 }
 
+/** 写真の表示幅。広い画面では本文の右側だけに写真を敷く。 */
+const PHOTO_SIZES = "(min-width: 1024px) 80vw, 100vw";
+
 export function Hero({ company }: { company: Company | null }) {
   const tagline =
     company?.tagline || "Web・アプリ・AIで、事業の次の一手をつくる。";
   const lines = taglineLines(tagline);
 
   return (
-    // The header is `fixed` and transparent at rest, so the navy field runs up
+    // The header is `fixed` and transparent at rest, so the stage runs up
     // behind it — no top margin. `pt-36` keeps the copy clear of the header.
-    <section className="hero-bg relative isolate flex min-h-[100svh] items-center overflow-hidden text-white">
-      {/* 背景: 格子・光のにじみ・漂う粒・下端の光の線。 */}
+    <section className="hero-bg relative isolate flex min-h-[100svh] items-center overflow-hidden text-on-stage">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
       >
-        <div className="bg-grid-dark absolute inset-0" />
+        {/* 東京の街並み。ダークテーマは夜景、ライトテーマは昼の景色にして、
+            テーマの切り替えがそのまま「夜 ↔ 昼」の切り替えに見えるようにする。
+            既定（ダーク）の夜景は最初から読み込み、昼の写真は表示されたとき
+            だけ読み込む（display:none の遅延画像は取得されない）。 */}
+        <div className="absolute inset-0 lg:left-[20%]">
+          <Image
+            src={tokyoNight}
+            alt=""
+            fill
+            sizes={PHOTO_SIZES}
+            placeholder="blur"
+            loading="eager"
+            fetchPriority="high"
+            className="hero-photo object-cover object-[45%_50%] light:hidden"
+          />
+          <Image
+            src={tokyoDay}
+            alt=""
+            fill
+            sizes={PHOTO_SIZES}
+            placeholder="blur"
+            className="hero-photo hidden object-cover object-[45%_50%] light:block"
+          />
+        </div>
+        {/* 写真の上の幕。本文の側を濃く（ダークはネイビー、ライトは白）して
+            文字を読ませ、反対側は街並みを見せる。 */}
+        <div className="hero-scrim absolute inset-0" />
+        <div className="bg-grid absolute inset-0 opacity-70" />
         <div className="aurora aurora-blue -right-[12%] -top-[18%] h-[46rem] w-[46rem]" />
         <div className="aurora aurora-violet -bottom-[30%] -left-[18%] h-[42rem] w-[42rem]" />
-        <div className="aurora aurora-cyan -bottom-[24%] right-[18%] h-[30rem] w-[30rem]" />
         {PARTICLES.map((p, i) => (
           <span
             key={i}
@@ -90,18 +122,18 @@ export function Hero({ company }: { company: Company | null }) {
             }
           />
         ))}
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-cyan/60 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-stage-accent/60 to-transparent" />
       </div>
 
-      <div className="mx-auto grid w-full max-w-7xl items-center px-5 pb-28 pt-36 sm:px-8 lg:grid-cols-[minmax(0,1.22fr)_minmax(0,0.78fr)] lg:gap-x-4 lg:pb-32 lg:pt-40">
-        <div className="relative z-10 min-w-0">
+      <div className="mx-auto w-full max-w-7xl px-5 pb-28 pt-36 sm:px-8 lg:pb-32 lg:pt-40">
+        <div className="relative z-10 max-w-[40rem] xl:max-w-[44rem]">
           <p
-            className="hero-fade inline-flex items-center gap-3 font-display text-[0.7rem] font-semibold tracking-[0.34em] text-cyan sm:text-xs"
+            className="hero-fade inline-flex items-center gap-3 font-display text-[0.7rem] font-semibold tracking-[0.34em] text-stage-accent sm:text-xs"
             style={delay(80)}
           >
             <span
               aria-hidden
-              className="beacon relative inline-block h-2 w-2 rounded-full bg-cyan"
+              className="beacon relative inline-block h-2 w-2 rounded-full bg-stage-accent"
             />
             WEB × SYSTEM × APP × AI
           </p>
@@ -121,24 +153,56 @@ export function Hero({ company }: { company: Company | null }) {
           </h1>
 
           <p
-            className="hero-fade jp-phrase mt-8 max-w-[36rem] text-[0.95rem] leading-[2.05] text-white/80 sm:text-lg sm:leading-[2]"
+            className="hero-fade jp-phrase mt-8 max-w-[36rem] text-[0.95rem] leading-[2.05] text-on-stage/80 sm:text-lg sm:leading-[2]"
             style={delay(620)}
           >
             株式会社WEB-XR.studioは、お客様のビジネス成長を加速させるITパートナーです。豊富なWeb制作実績を強みに、システム構築からアプリ開発、AI実装までワンストップで最適なソリューションをご提供いたします。
           </p>
 
-          {/* 相談の入口。1つ目はその場で担当チームを判定するモーダルを開き、
-              2つ目は問い合わせページへ送る。 */}
-          <div className="hero-fade max-w-[36rem]" style={delay(780)}>
-            <ProjectMatch />
-          </div>
-        </div>
+          {/* 相談の入口と、サービスの一覧。等幅の2列にして、狭い画面では
+              積み上げる。 */}
+          <div
+            className="hero-fade mt-10 grid max-w-[36rem] gap-3 sm:grid-cols-2"
+            style={delay(780)}
+          >
+            <Link
+              href="/contact"
+              className="group/cta relative inline-flex h-[3.75rem] items-center justify-between gap-3 overflow-hidden rounded-full bg-stage-cta pl-7 pr-2 text-base font-bold tracking-wide text-on-stage-cta shadow-[0_12px_40px_rgb(0_102_255_/_0.35)] transition-[translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgb(0_102_255_/_0.45)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stage-accent/50"
+            >
+              {/* 光の筋がホバーで横切る。 */}
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 -left-1/3 w-1/4 -skew-x-12 bg-gradient-to-r from-transparent via-accent/15 to-transparent transition-transform duration-700 ease-out group-hover/cta:translate-x-[520%] light:via-white/30"
+              />
+              <span className="flex items-center gap-2.5">
+                <Mail
+                  aria-hidden
+                  strokeWidth={1.9}
+                  className="h-5 w-5 shrink-0 text-accent light:text-white"
+                />
+                お問い合わせ
+              </span>
+              <span
+                aria-hidden
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-white transition-transform duration-300 group-hover/cta:translate-x-0.5 light:bg-white light:text-accent-ink"
+              >
+                <ArrowIcon />
+              </span>
+            </Link>
 
-        {/* 拠点マップ。広い画面では右の列に置き、狭い画面では本文の背後に
-            薄く敷く（縦に積むとヒーローが間延びするため）。xl 以上では左へ
-            はみ出させて大きく見せる（lg ではボタンに重なるので、列に収める）。 */}
-        <div className="pointer-events-none absolute -right-[30%] top-28 w-[110%] max-w-[34rem] opacity-30 sm:-right-[10%] sm:top-24 sm:w-[78%] sm:opacity-20 lg:pointer-events-auto lg:relative lg:right-auto lg:top-auto lg:w-full lg:max-w-none lg:opacity-100 xl:-ml-[30%] xl:w-[132%]">
-          <JapanNetwork className="map-in" />
+            <Link
+              href="/service"
+              className="group/more inline-flex h-[3.75rem] items-center justify-between gap-3 rounded-full border border-on-stage/35 bg-on-stage/[0.06] pl-7 pr-2 text-base font-bold tracking-wide text-on-stage backdrop-blur-sm transition-colors duration-300 hover:border-on-stage hover:bg-on-stage/[0.12] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stage-accent/50"
+            >
+              サービスを見る
+              <span
+                aria-hidden
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-on-stage/40 transition-colors duration-300 group-hover/more:border-on-stage group-hover/more:bg-on-stage group-hover/more:text-stage"
+              >
+                <ArrowIcon />
+              </span>
+            </Link>
+          </div>
         </div>
       </div>
 
@@ -146,13 +210,13 @@ export function Hero({ company }: { company: Company | null }) {
           それより狭いと本文の書き出しと重なる。 */}
       <div
         aria-hidden
-        className="hero-fade absolute bottom-0 left-8 hidden flex-col items-center gap-4 text-white/60 min-[1400px]:flex"
+        className="hero-fade absolute bottom-0 left-8 hidden flex-col items-center gap-4 text-on-stage/60 min-[1400px]:flex"
         style={delay(1200)}
       >
         <span className="font-display text-[0.65rem] font-semibold tracking-[0.4em] [writing-mode:vertical-rl]">
           SCROLL
         </span>
-        <span className="scroll-cue block h-20 w-px bg-white/20 text-cyan" />
+        <span className="scroll-cue block h-20 w-px bg-on-stage/20 text-stage-accent" />
       </div>
     </section>
   );
