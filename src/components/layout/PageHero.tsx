@@ -50,37 +50,49 @@ export function PageHero({
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
       >
+        {/* トップのヒーローと同じ、斜めに切った面（写真より奥に敷く）。 */}
+        <div className="hero-plane hero-plane--l" />
         {image && (
           <>
             {/* ダーク: 写真の明るさだけを拾ってネイビーに染める（luminosity）。
                 ライト: 写真の色のまま。どちらも左から右へ溶かし込み、文字の
                 背後はステージの色で覆う。 */}
-            <div
-              style={{ backgroundImage: `url(${image})` }}
-              className="absolute inset-0 bg-cover bg-center opacity-45 mix-blend-luminosity [mask-image:linear-gradient(180deg,transparent,#000_30%)] lg:left-[30%] lg:[mask-image:linear-gradient(90deg,transparent,#000_45%)] light:opacity-95 light:mix-blend-normal"
-            />
+            <div className="absolute inset-0 overflow-hidden [mask-image:linear-gradient(180deg,transparent,#000_30%)] lg:left-[30%] lg:[mask-image:linear-gradient(90deg,transparent,#000_45%)]">
+              {/* スクロールに合わせて写真をゆっくり沈める（視差）。動くぶん
+                  だけ上下に大きくしておく。 */}
+              <div
+                data-parallax="8"
+                style={{ backgroundImage: `url(${image})` }}
+                className="absolute inset-x-0 -inset-y-[10%] bg-cover bg-center opacity-45 mix-blend-luminosity light:opacity-95 light:mix-blend-normal"
+              />
+            </div>
             <div className="absolute inset-0 bg-gradient-to-t from-field via-field/70 to-field/20 lg:bg-gradient-to-r lg:from-field lg:via-field/75 lg:to-transparent" />
           </>
         )}
-        <div className="bg-grid absolute inset-0" />
-        <div className="aurora aurora-blue -right-[10%] -top-[40%] h-[36rem] w-[36rem]" />
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-stage-accent/50 to-transparent" />
+        <div className="bg-grid absolute inset-0 opacity-60" />
+        {/* 下を走る帯。 */}
+        <div className="hero-stripe !bottom-[3.4rem] !h-[5px] !w-[36vw]" />
       </div>
 
       {/* The top padding clears the fixed header (h-24 = 96px). */}
-      <div className="mx-auto flex min-h-[24rem] w-full max-w-6xl flex-col justify-end px-5 pb-14 pt-36 sm:min-h-[30rem] sm:pb-16 sm:pt-44">
+      <div className="mx-auto flex min-h-[24rem] w-full max-w-[74.5rem] flex-col justify-end px-5 pb-14 pt-36 sm:min-h-[30rem] sm:pb-16 sm:pt-44">
+        {/* 英字は色の帯が左から覆って右へ抜けると現れる。 */}
         <p
           aria-hidden
-          className="hero-fade text-gradient-stage break-words pb-1 font-display text-[2.6rem] font-extrabold uppercase leading-[1.02] tracking-[-0.01em] sm:text-7xl lg:text-[5.5rem]"
-          style={{ "--d": "60ms" } as React.CSSProperties}
+          className="break-words font-display text-[2.8rem] font-medium uppercase leading-[1.05] tracking-[0.05em] sm:text-7xl lg:text-[5.75rem]"
         >
-          {en}
+          <span
+            className="hero-block"
+            style={{ "--d": "120ms" } as React.CSSProperties}
+          >
+            <span>{en}</span>
+          </span>
         </p>
         <h1
-          className="hero-fade mt-5 flex items-center gap-3 text-xl font-bold tracking-wide sm:text-2xl"
-          style={{ "--d": "200ms" } as React.CSSProperties}
+          className="hero-fade mt-5 flex items-center gap-3 text-lg font-bold tracking-[0.12em] text-stage-accent sm:text-xl"
+          style={{ "--d": "520ms" } as React.CSSProperties}
         >
-          <span aria-hidden className="h-[3px] w-8 shrink-0 rounded-full bg-stage-accent" />
+          <span aria-hidden className="h-px w-10 shrink-0 bg-current" />
           {title}
         </h1>
         {description && (
@@ -94,7 +106,7 @@ export function PageHero({
       </div>
 
       <nav aria-label="パンくずリスト" className="relative border-t border-on-stage/10">
-        <ol className="mx-auto flex w-full max-w-6xl flex-wrap items-center gap-x-3 gap-y-1 px-5 py-4 text-xs text-on-stage/70 sm:text-[0.8rem]">
+        <ol className="mx-auto flex w-full max-w-[74.5rem] flex-wrap items-center gap-x-3 gap-y-1 px-5 py-4 text-xs text-on-stage/70 sm:text-[0.8rem]">
           <li>
             <Link
               href="/"

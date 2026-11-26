@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowUp } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { scrollToTop } from "@/lib/smooth-scroll";
 
 /**
  * ページ先頭へ戻るボタン。周囲の円がページ全体のスクロール率を表す。
@@ -64,14 +65,11 @@ export function ScrollToTop() {
     <button
       type="button"
       onClick={() =>
-        window.scrollTo({
-          top: 0,
-          // 「動きを減らす」設定のときは一気に戻す。
-          behavior: window.matchMedia("(prefers-reduced-motion: reduce)")
-            .matches
-            ? "auto"
-            : "smooth",
-        })
+        // 慣性スクロール（Lenis）が動いていればその動きで戻す。
+        // 「動きを減らす」設定のときは一気に戻す。
+        scrollToTop(
+          !window.matchMedia("(prefers-reduced-motion: reduce)").matches,
+        )
       }
       aria-label="ページの先頭へ戻る"
       // 隠すときも DOM には残し、不透明度と pointer-events で出し入れする。

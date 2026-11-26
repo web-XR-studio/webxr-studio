@@ -1,4 +1,6 @@
 import { Hero } from "@/components/sections/Hero";
+import { Clients } from "@/components/sections/Clients";
+import { PhotoBand } from "@/components/sections/PhotoBand";
 import { About } from "@/components/sections/About";
 import { Services } from "@/components/sections/Services";
 import { Strengths } from "@/components/sections/Strengths";
@@ -18,10 +20,12 @@ export const dynamic = "force-dynamic";
  * お客様事例 → よくある質問）の順に各ページの概要を置き、サービスの後ろに
  * 「選ばれる理由」「開発の流れ」「対応技術」を挟む。
  *
- * 背景は ステージ（ヒーロー）→ 白 / 淡い青の交互 → ステージ（強み）→ … →
- * ステージ（問い合わせ帯）→ 最も深いステージ（フッター）と切り替え、
- * ページ全体に緩急をつけている。ステージの色は配色テーマで変わる（ダークは
- * ネイビー、ライトは淡い青）。
+ * ヒーローの直後に取引先の帯、「私たちについて」の後に写真の帯を挟む。
+ *
+ * 背景は ステージ（ヒーロー）→ 白 / 淡い青の交互 → 写真の帯 → … →
+ * ステージ（強み）→ … → ステージ（問い合わせ帯）→ 最も深いステージ
+ * （フッター）と切り替え、ページ全体に緩急をつけている。ステージの色は
+ * 配色テーマで変わる（ライトは白と淡い青、ダークはネイビー）。
  */
 export default async function HomePage() {
   const [company, portfolio, faqs] = await Promise.all([
@@ -32,9 +36,12 @@ export default async function HomePage() {
 
   return (
     <>
-      {/* 相談の入口（お問い合わせ）とサービス一覧への導線はヒーローの2つのボタン。 */}
-      <Hero company={company} />
+      {/* 相談の入口（お問い合わせ）とサービス一覧への導線はヒーローの2つのボタン。
+          右端のカードには事例の先頭2件を出す。 */}
+      <Hero company={company} pickups={portfolio} />
+      <Clients items={portfolio} />
       <About variant="summary" />
+      <PhotoBand />
       {/* 会社概要のみ。沿革と企業理念は /company に置く。 */}
       <CompanyProfile
         eyebrow="COMPANY"

@@ -1,12 +1,12 @@
 import { Fragment } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Mail } from "lucide-react";
+import { ArrowUpRight, Mail } from "lucide-react";
 import { XrMark } from "@/components/brand/XrMark";
 import { ArrowIcon } from "@/components/ui/SectionLink";
-import type { Company } from "@/db/schema";
-import tokyoNight from "@/assets/photos/tokyo-night.webp";
-import tokyoDay from "@/assets/photos/tokyo-day.webp";
+import { HeroVisual } from "@/components/sections/hero/HeroVisual";
+import type { Company, Portfolio } from "@/db/schema";
+import { cn } from "@/lib/utils";
 
 /**
  * Renders the tagline with every literal "XR" replaced by the brand mark.
@@ -25,8 +25,8 @@ function taglineWithMark(text: string) {
 }
 
 /**
- * 見出しを読点「、」の直後で行に分ける。行ごとに下からせり上げるため。
- * 読点が無ければ1行のまま（管理画面でどう書き換えても崩れない）。
+ * 見出しを読点「、」の直後で行に分ける。行ごとに色の帯で覆ってから見せる
+ * ため。読点が無ければ1行のまま（管理画面でどう書き換えても崩れない）。
  */
 function taglineLines(text: string) {
   return text
@@ -35,107 +35,67 @@ function taglineLines(text: string) {
     .filter(Boolean);
 }
 
-/**
- * 背景に漂う光の粒。位置は固定の擬似乱数で決めるので、描画のたびに
- * 変わらない（サーバーで一度描くだけの装飾）。
- */
-const PARTICLES = (() => {
-  let seed = 7;
-  const rand = () => {
-    seed = (seed * 16807) % 2147483647;
-    return (seed - 1) / 2147483646;
-  };
-  return Array.from({ length: 22 }, () => ({
-    left: `${(rand() * 100).toFixed(2)}%`,
-    top: `${(40 + rand() * 60).toFixed(2)}%`,
-    d: `${(-rand() * 16).toFixed(2)}s`,
-    dur: `${(12 + rand() * 10).toFixed(2)}s`,
-    dx: `${((rand() - 0.5) * 80).toFixed(0)}px`,
-    size: rand() > 0.8 ? 3 : 2,
-  }));
-})();
-
 function delay(ms: number) {
   return { "--d": `${ms}ms` } as React.CSSProperties;
 }
 
-/** 写真の表示幅。広い画面では本文の右側だけに写真を敷く。 */
-const PHOTO_SIZES = "(min-width: 1024px) 80vw, 100vw";
+/** 事例の画像。管理画面で登録された順に、使えるものを選ぶ。 */
+function pickupImage(item: Portfolio) {
+  return item.thumbnailUrl || item.imageUrl || item.workImageUrl;
+}
 
-export function Hero({ company }: { company: Company | null }) {
+/**
+ * ファーストビュー。
+ *
+ * - 構成: 左に「線つきのラベル → 見出し → 説明 → 2つのボタン」、右に動く
+ *   図、右端に注目の事例のカードを縦に重ねる（狭い画面では順に積む）。
+ * - 背景: 斜めに切った2枚の面（左は細い斜線の入った淡い面、右は青みの
+ *   面）が左右から滑り込み、少し遅れて下の青い帯が左から走る。その上に
+ *   つながる点と粒子の図（HeroVisual）を描く。
+ * - 見出しは行ごとに色の帯が左から伸びて覆い、右へ抜けると文字が現れる。
+ *
+ * どの動きも CSS だけで最初の描画から始まるので、読み込みを待たない。
+ */
+export function Hero({
+  company,
+  pickups = [],
+}: {
+  company: Company | null;
+  /** 右端に出す事例（先頭の2件）。無ければカードの列ごと出さない。 */
+  pickups?: Portfolio[];
+}) {
   const tagline =
     company?.tagline || "Web・アプリ・AIで、事業の次の一手をつくる。";
   const lines = taglineLines(tagline);
+  const cards = pickups.slice(0, 2);
 
   return (
     // The header is `fixed` and transparent at rest, so the stage runs up
-    // behind it — no top margin. `pt-36` keeps the copy clear of the header.
-    <section className="hero-bg relative isolate flex min-h-[100svh] items-center overflow-hidden text-on-stage">
+    // behind it — no top margin. The top padding keeps the copy clear of it.
+    <section className="hero-bg relative isolate overflow-hidden text-on-stage">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
       >
-        {/* 東京の街並み。ダークテーマは夜景、ライトテーマは昼の景色にして、
-            テーマの切り替えがそのまま「夜 ↔ 昼」の切り替えに見えるようにする。
-            既定（ダーク）の夜景は最初から読み込み、昼の写真は表示されたとき
-            だけ読み込む（display:none の遅延画像は取得されない）。 */}
-        <div className="absolute inset-0 lg:left-[20%]">
-          <Image
-            src={tokyoNight}
-            alt=""
-            fill
-            sizes={PHOTO_SIZES}
-            placeholder="blur"
-            loading="eager"
-            fetchPriority="high"
-            className="hero-photo object-cover object-[45%_50%] light:hidden"
-          />
-          <Image
-            src={tokyoDay}
-            alt=""
-            fill
-            sizes={PHOTO_SIZES}
-            placeholder="blur"
-            className="hero-photo hidden object-cover object-[45%_50%] light:block"
-          />
-        </div>
-        {/* 写真の上の幕。本文の側を濃く（ダークはネイビー、ライトは白）して
-            文字を読ませ、反対側は街並みを見せる。 */}
-        <div className="hero-scrim absolute inset-0" />
-        <div className="bg-grid absolute inset-0 opacity-70" />
-        <div className="aurora aurora-blue -right-[12%] -top-[18%] h-[46rem] w-[46rem]" />
-        <div className="aurora aurora-violet -bottom-[30%] -left-[18%] h-[42rem] w-[42rem]" />
-        {PARTICLES.map((p, i) => (
-          <span
-            key={i}
-            className="particle"
-            style={
-              {
-                left: p.left,
-                top: p.top,
-                width: p.size,
-                height: p.size,
-                "--d": p.d,
-                "--dur": p.dur,
-                "--dx": p.dx,
-              } as React.CSSProperties
-            }
-          />
-        ))}
-        <div className="absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-stage-accent/60 to-transparent" />
+        <div className="hero-plane hero-plane--l" />
+        <div className="hero-plane hero-plane--r" />
+        <div className="hero-stripe" />
       </div>
 
-      <div className="mx-auto w-full max-w-7xl px-5 pb-28 pt-36 sm:px-8 lg:pb-32 lg:pt-40">
-        <div className="relative z-10 max-w-[40rem] xl:max-w-[44rem]">
+      <div
+        className={cn(
+          "mx-auto grid min-h-[100svh] w-full max-w-[90rem] items-center gap-x-10 gap-y-14 px-5 pb-28 pt-32 sm:px-8 lg:grid-cols-[minmax(0,1.08fr)_minmax(0,1fr)] lg:px-10 lg:pt-36",
+          cards.length > 0 &&
+            "xl:grid-cols-[minmax(0,1.1fr)_minmax(0,0.95fr)_16.5rem] xl:gap-x-8",
+        )}
+      >
+        <div className="relative z-10">
           <p
-            className="hero-fade inline-flex items-center gap-3 font-display text-[0.7rem] font-semibold tracking-[0.34em] text-stage-accent sm:text-xs"
-            style={delay(80)}
+            className="hero-fade flex items-center gap-4 font-display text-[0.72rem] font-medium tracking-[0.34em] text-stage-accent sm:text-xs"
+            style={delay(150)}
           >
-            <span
-              aria-hidden
-              className="beacon relative inline-block h-2 w-2 rounded-full bg-stage-accent"
-            />
-            WEB × SYSTEM × APP × AI
+            <span aria-hidden className="h-px w-10 bg-current" />
+            WEB · SYSTEM · APP · AI
           </p>
 
           {/* `aria-label` carries the plain string so screen readers announce
@@ -143,18 +103,27 @@ export function Hero({ company }: { company: Company | null }) {
               split into lines. */}
           <h1
             aria-label={tagline}
-            className="mt-6 text-[clamp(1.75rem,7.4vw,3rem)] font-black leading-[1.28] tracking-[-0.01em] lg:text-[3rem] xl:text-[3.6rem]"
+            className="mt-7 text-[clamp(1.85rem,7.2vw,3rem)] font-black leading-[1.36] tracking-[0.02em] lg:text-[3.1rem] xl:text-[3.45rem]"
           >
             {lines.map((line, i) => (
-              <span key={i} aria-hidden className="hero-line">
-                <span style={delay(220 + i * 150)}>{taglineWithMark(line)}</span>
+              <span key={i} aria-hidden className="block">
+                <span
+                  className={cn(
+                    "hero-block",
+                    // 1行目を色で立て、何をする会社かを先に伝える。
+                    i === 0 && lines.length > 1 && "text-stage-accent",
+                  )}
+                  style={delay(320 + i * 200)}
+                >
+                  <span>{taglineWithMark(line)}</span>
+                </span>
               </span>
             ))}
           </h1>
 
           <p
-            className="hero-fade jp-phrase mt-8 max-w-[36rem] text-[0.95rem] leading-[2.05] text-on-stage/80 sm:text-lg sm:leading-[2]"
-            style={delay(620)}
+            className="hero-fade jp-phrase mt-8 max-w-[34rem] text-[0.95rem] leading-[2.05] text-on-stage/75 sm:text-[1.05rem]"
+            style={delay(900)}
           >
             株式会社WEB-XR.studioは、お客様のビジネス成長を加速させるITパートナーです。豊富なWeb制作実績を強みに、システム構築からアプリ開発、AI実装までワンストップで最適なソリューションをご提供いたします。
           </p>
@@ -162,12 +131,12 @@ export function Hero({ company }: { company: Company | null }) {
           {/* 相談の入口と、サービスの一覧。等幅の2列にして、狭い画面では
               積み上げる。 */}
           <div
-            className="hero-fade mt-10 grid max-w-[36rem] gap-3 sm:grid-cols-2"
-            style={delay(780)}
+            className="hero-fade mt-10 grid max-w-[34rem] gap-3 sm:grid-cols-2"
+            style={delay(1050)}
           >
             <Link
               href="/contact"
-              className="group/cta relative inline-flex h-[3.75rem] items-center justify-between gap-3 overflow-hidden rounded-full bg-stage-cta pl-7 pr-2 text-base font-bold tracking-wide text-on-stage-cta shadow-[0_12px_40px_rgb(0_102_255_/_0.35)] transition-[translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgb(0_102_255_/_0.45)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stage-accent/50"
+              className="group/cta relative inline-flex h-[3.75rem] items-center justify-between gap-3 overflow-hidden rounded-full bg-stage-cta pl-7 pr-2 text-base font-bold tracking-wide text-on-stage-cta shadow-[0_12px_40px_rgb(0_102_255_/_0.3)] transition-[translate,box-shadow] duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_50px_rgb(0_102_255_/_0.42)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stage-accent/50"
             >
               {/* 光の筋がホバーで横切る。 */}
               <span
@@ -192,31 +161,103 @@ export function Hero({ company }: { company: Company | null }) {
 
             <Link
               href="/service"
-              className="group/more inline-flex h-[3.75rem] items-center justify-between gap-3 rounded-full border border-on-stage/35 bg-on-stage/[0.06] pl-7 pr-2 text-base font-bold tracking-wide text-on-stage backdrop-blur-sm transition-colors duration-300 hover:border-on-stage hover:bg-on-stage/[0.12] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stage-accent/50"
+              className="group/more inline-flex h-[3.75rem] items-center justify-between gap-3 rounded-full border border-on-stage/25 bg-stage/60 pl-7 pr-2 text-base font-bold tracking-wide text-on-stage backdrop-blur-sm transition-colors duration-300 hover:border-on-stage hover:bg-on-stage/[0.06] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-stage-accent/50"
             >
               サービスを見る
               <span
                 aria-hidden
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-on-stage/40 transition-colors duration-300 group-hover/more:border-on-stage group-hover/more:bg-on-stage group-hover/more:text-stage"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-on-stage/30 transition-colors duration-300 group-hover/more:border-on-stage group-hover/more:bg-on-stage group-hover/more:text-stage"
               >
                 <ArrowIcon />
               </span>
             </Link>
           </div>
         </div>
+
+        {/* 動く図。この列には position・transform・opacity を付けない
+            （描画面が <section> を基準に全面へ広がるように）。出現の動きは
+            HeroVisual の中の枠に付けている。 */}
+        <div>
+          <HeroVisual />
+        </div>
+
+        {cards.length > 0 && (
+          <aside
+            aria-labelledby="hero-pickup"
+            className="hero-fade relative z-10 lg:col-span-2 xl:col-span-1"
+            style={delay(1250)}
+          >
+            <p
+              id="hero-pickup"
+              className="flex items-center gap-3 font-display text-[0.72rem] font-medium tracking-[0.3em] text-on-stage/60"
+            >
+              <span aria-hidden className="h-px w-6 bg-current" />
+              PICK UP
+              <span className="sr-only">注目の事例</span>
+            </p>
+            <ul className="mt-4 grid gap-4 sm:grid-cols-2 xl:grid-cols-1">
+              {cards.map((item) => {
+                const src = pickupImage(item);
+                return (
+                  <li key={item.id}>
+                    <Link
+                      href={`/case-study/${item.id}`}
+                      className="group block overflow-hidden rounded-xl border border-on-stage/10 bg-stage-card shadow-[0_18px_44px_-18px_rgb(6_20_48_/_0.35)] backdrop-blur-md transition-[translate,border-color,box-shadow] duration-300 hover:-translate-y-1 hover:border-stage-accent/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-stage-accent/60"
+                    >
+                      <span className="relative block aspect-[16/8] overflow-hidden bg-on-stage/5">
+                        {src && (
+                          <Image
+                            src={src}
+                            alt=""
+                            fill
+                            sizes="(min-width: 1280px) 16.5rem, (min-width: 640px) 45vw, 90vw"
+                            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+                          />
+                        )}
+                        <span
+                          aria-hidden
+                          className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-navy-950/45 to-transparent"
+                        />
+                      </span>
+                      <span className="block p-4">
+                        <span className="block text-[0.7rem] font-bold tracking-[0.12em] text-stage-accent">
+                          {item.industry || "CASE STUDY"}
+                        </span>
+                        <span className="mt-1.5 flex items-start justify-between gap-3">
+                          <span className="line-clamp-2 text-sm font-bold leading-snug text-on-stage">
+                            {item.title}
+                          </span>
+                          <ArrowUpRight
+                            aria-hidden
+                            strokeWidth={2}
+                            className="mt-0.5 h-4 w-4 shrink-0 text-on-stage/60 transition-[translate,color] duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-stage-accent"
+                          />
+                        </span>
+                        {item.companyName && (
+                          <span className="mt-1.5 block truncate text-xs text-on-stage/60">
+                            {item.companyName}
+                          </span>
+                        )}
+                      </span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </aside>
+        )}
       </div>
 
-      {/* SCROLL の合図。本文の左に余白が生まれる幅（1400px〜）でだけ出す。
-          それより狭いと本文の書き出しと重なる。 */}
+      {/* SCROLL の合図。下の中央に置く。 */}
       <div
         aria-hidden
-        className="hero-fade absolute bottom-0 left-8 hidden flex-col items-center gap-4 text-on-stage/60 min-[1400px]:flex"
-        style={delay(1200)}
+        className="hero-fade absolute bottom-0 left-1/2 hidden -translate-x-1/2 flex-col items-center gap-3 text-on-stage/55 lg:flex"
+        style={delay(1500)}
       >
-        <span className="font-display text-[0.65rem] font-semibold tracking-[0.4em] [writing-mode:vertical-rl]">
+        <span className="font-display text-[0.65rem] font-medium tracking-[0.4em]">
           SCROLL
         </span>
-        <span className="scroll-cue block h-20 w-px bg-on-stage/20 text-stage-accent" />
+        <span className="scroll-cue block h-14 w-px bg-on-stage/20 text-stage-accent" />
       </div>
     </section>
   );

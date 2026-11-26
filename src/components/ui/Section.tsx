@@ -4,8 +4,12 @@ import { revealDelay } from "@/lib/reveal";
 
 /**
  * 見出しは「大きな英字 → 日本語の見出し → 説明」の二言語の組み。英字は
- * 装飾として大きく見せ、意味を担う日本語を h2 にする（読み上げや検索では
- * 日本語の見出しとして扱われる）。
+ * 細身の書体（Oswald）で大きく見せ、意味を担う日本語を h2 にする（読み上げ
+ * や検索では日本語の見出しとして扱われる）。日本語は線を添えた小さな
+ * 札にして、英字を引き立てる。
+ *
+ * 英字は画面に入ると色の帯が左から伸びて覆い、右へ抜けると現れる
+ * （`data-reveal="block"`）。中央揃えのときは下に細い縦線を引く。
  *
  * `Section` の中で使うほか、見出しを左の列に置く2段組のセクション（FAQ・
  * 会社案内）が単体で使う。
@@ -33,35 +37,40 @@ export function SectionHeading({
     <div className={cn(centered && "text-center", className)}>
       {eyebrow && (
         <p
-          data-reveal="mask"
+          data-reveal="block"
           className={cn(
-            "inline-block break-words pb-1 font-display text-[2.5rem] font-extrabold uppercase leading-[1.02] tracking-[-0.01em] sm:text-6xl lg:text-7xl",
-            onStage ? "text-gradient-stage" : "text-gradient",
+            "inline-block max-w-full break-words font-display text-[2.6rem] font-medium uppercase leading-[1.08] tracking-[0.06em] sm:text-6xl lg:text-[4.5rem]",
+            onStage ? "text-on-stage" : "text-ink",
           )}
         >
-          {eyebrow}
+          <span>{eyebrow}</span>
         </p>
       )}
       {title && (
         <h2
           data-reveal
-          style={revealDelay(1, 120)}
+          style={revealDelay(1, 160)}
           className={cn(
-            "flex items-center gap-3 text-lg font-bold tracking-wide sm:text-xl",
+            "flex items-center gap-3 text-sm font-bold tracking-[0.14em] sm:text-base",
             centered && "justify-center",
             eyebrow && "mt-4",
-            onStage ? "text-on-stage" : "text-ink",
+            onStage ? "text-stage-accent" : "text-accent-ink",
           )}
         >
-          <span
-            aria-hidden
-            className={cn(
-              "h-[3px] w-7 shrink-0 rounded-full",
-              onStage ? "bg-stage-accent" : "bg-accent",
-            )}
-          />
+          <span aria-hidden className="h-px w-8 shrink-0 bg-current" />
           {title}
         </h2>
+      )}
+      {centered && (eyebrow || title) && (
+        <span
+          aria-hidden
+          data-reveal="line-v"
+          style={revealDelay(2, 160)}
+          className={cn(
+            "mx-auto mt-7 block h-12 w-px",
+            onStage ? "bg-on-stage/30" : "bg-ink/25",
+          )}
+        />
       )}
       {description && (
         <p
@@ -127,6 +136,13 @@ export function Section({
         className,
       )}
     >
+      {/* 淡い面のセクションには、斜めに切った明るい面と細い斜線を敷く。 */}
+      {tone === "muted" && (
+        <div
+          aria-hidden
+          className="section-slant pointer-events-none absolute inset-0 -z-10"
+        />
+      )}
       {backdrop && (
         <div
           aria-hidden

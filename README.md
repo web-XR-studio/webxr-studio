@@ -3,7 +3,8 @@
 株式会社 WEB-XR.studio のコーポレートサイト。Web制作・システム開発・アプリ開発・AIソリューションを紹介する日本語のサイトです。
 
 - **公開サイト** — 私たちについて / 会社案内 / サービス / お客様事例 / よくある質問 / お問い合わせ の6ページ（トップページは各ページの概要）
-- **配色テーマ** — ダーク（既定）とライトを、ヘッダーのボタンで切り替え。選んだテーマはブラウザに保存されます
+- **配色テーマ** — ライト（既定）とダークを、ヘッダーのボタンで切り替え。選んだテーマはブラウザに保存されます
+- **動きの演出** — 粒子が形を組み替えるファーストビュー、色の帯で見出しを見せる出現、慣性スクロールと写真の視差
 - **管理ダッシュボード** — すべてのコンテンツを追加・編集・削除できるパスワード保護の管理画面（`/admin`）
 
 ## 技術スタック
@@ -11,7 +12,8 @@
 | 項目                  | 採用技術                                                                         |
 | --------------------- | -------------------------------------------------------------------------------- |
 | フレームワーク        | Next.js 16（App Router）+ TypeScript                                             |
-| スタイリング          | Tailwind CSS v4（ダーク / ライトの配色テーマ）                                   |
+| スタイリング          | Tailwind CSS v4（ライト / ダークの配色テーマ）、英字は Oswald                    |
+| アニメーション        | GSAP（ScrollTrigger）、Lenis（慣性スクロール）、Canvas 2D（ファーストビュー）    |
 | データベース          | Neon Postgres + `pgvector`                                                       |
 | ORM                   | Drizzle ORM                                                                      |
 | 認証                  | パスワード + JWT（`jose`）を httpOnly Cookie に保存、Proxy で保護                |
@@ -103,10 +105,17 @@ npm run dev
 
 ヘッダーの太陽 / 月のボタン（狭い画面ではメニュー内の「ライト / ダーク」）で、サイトの配色を切り替えられます。
 
-- **ダーク（既定）** — ヒーロー・強み・問い合わせ帯・フッターなどの「ステージ」の面をネイビーにし、ヒーローに夜の東京の写真を敷きます
-- **ライト** — ステージの面を淡い青白にし、ヒーローに昼の東京の写真を敷きます
+- **ライト（既定）** — 白とごく淡い青を基調にした明るい見た目。写真の帯には昼の東京の写真を使います
+- **ダーク** — ヒーロー・強み・問い合わせ帯・フッターなどの「ステージ」の面をネイビーにし、光る点と線を際立たせます。写真の帯は夜の東京です
 
-選んだテーマは `localStorage` に保存され、次の訪問でも引き継がれます。描画前に `<head>` のスクリプトが反映するため、読み込み時にちらつきません。色は `src/app/globals.css` のステージ系トークン（`--stage` / `--on-stage` / `--stage-accent` …）で決まり、ライトの値は `[data-theme="light"]` で上書きしています。管理画面はテーマの影響を受けません。
+選んだテーマは `localStorage` に保存され、次の訪問でも引き継がれます（以前にダークを選んだ訪問者はダークのまま）。描画前に `<head>` のスクリプトが反映するため、読み込み時にちらつきません。色は `src/app/globals.css` のステージ系トークン（`--stage` / `--on-stage` / `--stage-accent` …）で決まり、ライトの値は `[data-theme="light"]` で上書きしています。管理画面はテーマの影響を受けません。
+
+### 動きの演出
+
+- **ファーストビュー**（`components/sections/Hero.tsx` / `hero/HeroVisual.tsx`）— 斜めに切った2枚の面が左右から入り、見出しを行ごとに色の帯で覆ってから見せ、下の帯が走ります。背景の Canvas には、漂う点を線で結んだネットワークと、数千の粒子が「ロゴ → Web（回る地球）→ システム → アプリ → AI」と形を組み替える図を描きます（形は Lucide のアイコンから作ります）。右端のカードには事例の先頭2件が出ます
+- **取引先の帯**（`components/sections/Clients.tsx`）— 事例に登録された会社名を横に流します。会社名の入った事例が無ければ表示しません
+- **スクロールの演出** — `data-reveal`（フェード）、`data-reveal="block"`（色の帯が覆って抜ける。子要素を1つ持たせる）、`data-parallax="8"`（枠の中で写真を上下 8% 動かす。GSAP ScrollTrigger）。ホイールのスクロールは Lenis でなめらかにしています
+- **止める手段** — 動き続ける表示（ファーストビュー・流れる帯）には「動きを止める」ボタンがあります。OS の「視差効果を減らす / アニメーションを減らす」設定では、慣性スクロールと視差を使わず、すべて止まった状態で表示します
 
 ## アーキテクチャ
 
@@ -119,10 +128,10 @@ src/
       auth/              ログイン・ログアウト
       admin/             コンテンツCRUD（Proxyで保護）
       contact/           お問い合わせ送信
-  assets/photos/         Unsplash の写真（ヒーロー・サービス）
-  components/            UI / sections / layout / admin / brand
+  assets/photos/         Unsplash の写真（写真の帯・サービス）
+  components/            UI / sections / layout / admin / brand / motion（慣性スクロール・視差）
   db/                    Drizzle schema・接続・migrate・seed
-  lib/                   auth / content / embeddings / rag / sections / slack / theme
+  lib/                   auth / content / embeddings / rag / sections / slack / theme / smooth-scroll
   proxy.ts               管理エリアの認証ガード（Next.js 16 の Proxy）
 public/                  会社案内・沿革などの写真
 scripts/                 画像の移行（Cloudinary）
@@ -138,8 +147,8 @@ Vercel などにデプロイする場合は、上記の環境変数を設定し�
 
 | ファイル              | 用途                       | 撮影者                        | 出典                                                                                                                |
 | --------------------- | -------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `tokyo-night.webp`    | ヒーロー（ダークテーマ）   | Takashi Miyazaki              | [Unsplash](https://unsplash.com/photos/aerial-view-of-city-buildings-during-night-time-64ajtpEzlYc)                  |
-| `tokyo-day.webp`      | ヒーロー（ライトテーマ）   | Jaison Lin                    | [Unsplash](https://unsplash.com/photos/aerial-photography-of-red-tower-surrounded-by-buildings-during-daytime-2WHTac8jVA8) |
+| `tokyo-night.webp`    | 写真の帯（ダークテーマ）   | Takashi Miyazaki              | [Unsplash](https://unsplash.com/photos/aerial-view-of-city-buildings-during-night-time-64ajtpEzlYc)                  |
+| `tokyo-day.webp`      | 写真の帯（ライトテーマ）   | Jaison Lin                    | [Unsplash](https://unsplash.com/photos/aerial-photography-of-red-tower-surrounded-by-buildings-during-daytime-2WHTac8jVA8) |
 | `service-web.webp`    | サービス（Web制作）        | Carriza Maiquez               | [Unsplash](https://unsplash.com/photos/a-laptop-computer-sitting-on-top-of-a-wooden-desk-RTdvy9izXvw)               |
 | `service-system.webp` | サービス（システム開発）   | Christina @ wocintechchat.com | [Unsplash](https://unsplash.com/photos/woman-in-black-top-using-surface-laptop-glRqyWJgUeY)                          |
 | `service-app.webp`    | サービス（アプリ開発）     | Balázs Kétyi                  | [Unsplash](https://unsplash.com/photos/smartphone-displaying-environmental-data-dashboard-sScmok4Iq1o)              |

@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { FooterBanner } from "@/components/layout/FooterBanner";
 import { ScrollToTop } from "@/components/layout/ScrollToTop";
 import { RevealObserver } from "@/components/ui/RevealObserver";
+import { SmoothScroll } from "@/components/motion/SmoothScroll";
 import type { Metadata } from "next";
 import { getSiteSettings } from "@/lib/content";
 
@@ -54,6 +55,8 @@ export default async function SiteLayout({
       <ScrollToTop />
       {/* スクロールに合わせた出現演出。[data-reveal] を見張るだけで描画はしない。 */}
       <RevealObserver />
+      {/* 慣性スクロールと、写真の視差。こちらも描画はしない。 */}
+      <SmoothScroll />
     </div>
   );
 }

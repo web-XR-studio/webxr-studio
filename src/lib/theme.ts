@@ -1,14 +1,15 @@
 /**
  * 配色テーマ（ダーク / ライト）の共通定義。
  *
- * テーマは <html data-theme> の値そのもの。ダークが既定（サイト本来の
- * ネイビーの見た目）で、訪問者が切り替えたときだけ localStorage に残す。
+ * テーマは <html data-theme> の値そのもの。ライト（白を基調にした明るい
+ * 見た目）が既定で、訪問者が切り替えたときだけ localStorage に残す。
+ * 以前に選んだテーマが保存されている訪問者には、そちらを使い続ける。
  * 描画前の反映はルートレイアウトのインラインスクリプト、切り替えは
  * ThemeToggle が担う。
  */
 export type Theme = "dark" | "light";
 
-export const DEFAULT_THEME: Theme = "dark";
+export const DEFAULT_THEME: Theme = "light";
 export const THEME_STORAGE_KEY = "theme";
 
 /**

@@ -132,7 +132,9 @@ export function ThemeToggle({ className }: { className?: string }) {
       aria-label={label}
       title={label}
       className={cn(
-        "group/theme inline-flex items-center justify-center transition-colors duration-300",
+        // display は呼び出し側で決める（狭い画面だけ・広い画面だけ出す使い方があり、
+        // ここで inline-flex を付けると hidden を打ち消してしまう）。
+        "group/theme items-center justify-center transition-colors duration-300",
         className,
       )}
     >

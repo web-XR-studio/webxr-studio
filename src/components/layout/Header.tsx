@@ -212,7 +212,7 @@ export function Header() {
           <div className="mr-3 flex items-center gap-1 lg:hidden">
             <ThemeToggle
               className={cn(
-                "h-11 w-11 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60",
+                "inline-flex h-11 w-11 rounded-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/60",
                 onHero ? "text-on-stage" : "text-ink",
               )}
             />

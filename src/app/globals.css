@@ -7,17 +7,18 @@
    フッターなどの「ステージ」の面で緩急をつける。ステージの面は配色テーマで
    塗りが変わる。
 
-   - ダーク（既定）: 深いネイビー。夜の東京の写真と合わせて重さを出す。
-   - ライト:         淡い青白。昼の東京の写真と合わせて明るく見せる。
+   - ライト（既定）: 白とごく淡い青。余白を広くとった明るい見た目。
+   - ダーク:         深いネイビー。光る点と線が映える夜の見た目。
 
    テーマは <html data-theme="dark|light"> で切り替える（ルートレイアウトの
-   インラインスクリプトが、描画前に保存済みの選択を反映する）。
+   インラインスクリプトが、描画前に保存済みの選択を反映する）。下の :root
+   はダークの値で、ライトの値は [data-theme="light"] で上書きしている。
 
    Contrast rules
    - On white: --ink / --ink-soft / --muted all clear AA (≥ 5.9:1).
    - On the dark stage (navy-900): white is 17:1, white/70 is 9:1, --cyan is
      8.6:1. Body copy on a stage may go down to on-stage/70, never lower.
-   - On the light stage (#eef4fc): ink/70 is 9:1, --accent-ink is 6.2:1.
+   - On the light stage (#f2f6fb): ink/70 is 9:1, --accent-ink is 6.6:1.
    - --accent (#0066ff) carries white text at 4.86:1 — fine for buttons.
      When blue has to work as *text* on white, use --accent-ink (6.9:1).
 
@@ -73,17 +74,29 @@
   --glow-blue: rgb(0 102 255 / 0.45);
   --glow-cyan: rgb(56 189 248 / 0.28);
   --glow-violet: rgb(139 123 255 / 0.32);
-  --particle: rgb(255 255 255 / 0.7);
+  /* Hero canvas (HeroVisual reads these as "r g b" triplets): particle
+     figures, network lines, and the blinking nodes. */
+  --hero-dot: 150 205 255;
+  --hero-line: 255 255 255;
+  --hero-spark: 56 189 248;
+  /* Hero planes: the hatched soft plane on the left, the tinted one on the
+     right, and the hatching itself. */
+  --plane-soft: rgb(255 255 255 / 0.03);
+  --plane-accent: linear-gradient(
+    160deg,
+    rgb(0 102 255 / 0.22),
+    rgb(56 189 248 / 0.05)
+  );
+  --hatch: rgb(255 255 255 / 0.05);
 
-  /* Font stacks. `--font-noto` / `--font-montserrat` are declared by
-     next/font on <html>; the system fonts behind them only show while the web
-     fonts load (or if they fail). */
+  /* Font stacks. `--font-noto` / `--font-oswald` are declared by next/font
+     on <html>; the system fonts behind them only show while the web fonts
+     load (or if they fail). */
   --font-jp-stack:
     var(--font-noto), "Hiragino Kaku Gothic ProN", "Hiragino Sans",
     "Yu Gothic", YuGothic, Meiryo, sans-serif;
   --font-display-stack:
-    var(--font-montserrat), var(--font-noto), "Helvetica Neue", Arial,
-    sans-serif;
+    var(--font-oswald), "Arial Narrow", var(--font-noto), Arial, sans-serif;
 
   /* Shared easing curves. */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -92,24 +105,34 @@
 
 /* ---- Stage (light theme) ------------------------------------------------ */
 [data-theme="light"] {
-  --stage: #eef4fc;
-  --stage-deep: #e6eef9;
+  --stage: #f2f6fb;
+  --stage-deep: #eaf0f8;
   --stage-card: #ffffff;
   --stage-card-hover: #ffffff;
   --on-stage: var(--ink);
   --stage-accent: var(--accent-ink);
   --stage-cta: var(--accent);
   --on-stage-cta: #ffffff;
-  --field-from: #f8fbff;
-  --field-mid: #f0f5fd;
-  --field-to: #e4eefb;
-  --field-glow-a: rgb(0 102 255 / 0.12);
-  --field-glow-b: rgb(139 123 255 / 0.1);
-  --grid-line: rgb(10 31 69 / 0.06);
-  --glow-blue: rgb(0 102 255 / 0.16);
-  --glow-cyan: rgb(56 189 248 / 0.2);
-  --glow-violet: rgb(139 123 255 / 0.14);
+  --field-from: #ffffff;
+  --field-mid: #f7faff;
+  --field-to: #edf3fc;
+  --field-glow-a: rgb(0 102 255 / 0.08);
+  --field-glow-b: rgb(56 189 248 / 0.08);
+  --grid-line: rgb(10 31 69 / 0.05);
+  --glow-blue: rgb(0 102 255 / 0.12);
+  --glow-cyan: rgb(56 189 248 / 0.16);
+  --glow-violet: rgb(139 123 255 / 0.1);
   --particle: rgb(0 102 255 / 0.4);
+  --hero-dot: 0 92 230;
+  --hero-line: 10 31 69;
+  --hero-spark: 0 140 255;
+  --plane-soft: #f3f6fa;
+  --plane-accent: linear-gradient(
+    160deg,
+    rgb(0 102 255 / 0.1),
+    rgb(56 189 248 / 0.03)
+  );
+  --hatch: rgb(10 31 69 / 0.065);
 }
 
 /* `light:` — styles that only apply in the light theme (photo blending, icon
@@ -156,6 +179,29 @@
 html {
   scroll-behavior: smooth;
   -webkit-text-size-adjust: 100%;
+}
+
+/* Smooth scrolling (Lenis, started by SmoothScroll). Lenis moves the page
+   itself, frame by frame, so the browser's own smooth scrolling must be off
+   while it runs — otherwise every step is animated twice. The rest mirrors
+   lenis/dist/lenis.css. */
+html.lenis {
+  scroll-behavior: auto;
+}
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis:not(.lenis-autoToggle).lenis-stopped {
+  overflow: clip;
+}
+.lenis [data-lenis-prevent],
+.lenis [data-lenis-prevent-wheel],
+.lenis [data-lenis-prevent-touch] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-smooth iframe {
+  pointer-events: none;
 }
 
 body {
@@ -406,34 +452,101 @@ html.reveal-ready [data-reveal="line"]:not(.is-revealed) {
 [data-reveal="line"] {
   transform-origin: left center;
 }
+/* A vertical rule that draws downwards (under centred section headings). */
+html.reveal-ready [data-reveal="line-v"]:not(.is-revealed) {
+  opacity: 1;
+  transform: scaleY(0);
+}
+[data-reveal="line-v"] {
+  transform-origin: center top;
+}
+
+/* Block reveal. A bar of colour grows from the left until it covers the
+   element, then retracts to the right; the content appears the moment the
+   bar fully covers it. The element needs exactly one child element (wrap
+   plain text in a <span>) and should be `inline-block` so the bar matches
+   the text, not the whole row. The same keyframes drive the hero headline
+   on load (`.hero-block`). */
+[data-reveal="block"],
+.hero-block {
+  position: relative;
+}
+[data-reveal="block"]::after,
+.hero-block::after {
+  content: "";
+  position: absolute;
+  inset: 0.04em -0.06em;
+  background: var(--block-color, var(--accent));
+  transform: scaleX(0);
+  transform-origin: left center;
+  pointer-events: none;
+}
+html.reveal-ready [data-reveal="block"]:not(.is-revealed) {
+  opacity: 1;
+  transform: none;
+}
+html.reveal-ready [data-reveal="block"]:not(.is-revealed) > * {
+  opacity: 0;
+}
+[data-reveal="block"].is-revealed::after {
+  animation: block-bar 1.1s var(--ease-in-out-quart) var(--reveal-delay, 0ms)
+    both;
+}
+[data-reveal="block"].is-revealed > * {
+  animation: block-content 1.1s linear var(--reveal-delay, 0ms) both;
+}
+.hero-block {
+  display: inline-block;
+}
+.hero-block::after {
+  animation: block-bar 1.2s var(--ease-in-out-quart) var(--d, 0ms) both;
+}
+.hero-block > * {
+  animation: block-content 1.2s linear var(--d, 0ms) both;
+}
+@keyframes block-bar {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left center;
+  }
+  46% {
+    transform: scaleX(1);
+    transform-origin: left center;
+  }
+  54% {
+    transform: scaleX(1);
+    transform-origin: right center;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: right center;
+  }
+}
+@keyframes block-content {
+  0%,
+  49% {
+    opacity: 0;
+  }
+  50%,
+  100% {
+    opacity: 1;
+  }
+}
 
 /* ---------------------------------------------------------------------------
    Hero entrance. Runs once on load from CSS alone, so the first view never
-   waits for hydration. Lines of the headline rise out of a clipping box.
+   waits for hydration.
+
+   1. Two slanted planes slide in from either side (the hatched soft plane on
+      the left, the tinted plane on the right).
+   2. Each line of the headline is covered by a bar of colour and uncovered
+      (`.hero-block`, defined with the block reveal above).
+   3. A skewed stripe runs in along the bottom from the left.
+   4. The rest of the copy, the figure and the cards fade up in turn.
 --------------------------------------------------------------------------- */
-.hero-line {
-  display: block;
-  overflow: hidden;
-  /* Room for descenders and the XR mark's ring inside the clip. */
-  padding-block: 0.08em;
-  margin-block: -0.08em;
-}
-.hero-line > span {
-  display: inline-block;
-  animation: hero-line-in 1.15s var(--ease-out-expo) both;
-  animation-delay: var(--d, 0ms);
-}
 .hero-fade {
   animation: hero-fade-in 1.1s var(--ease-out-expo) both;
   animation-delay: var(--d, 0ms);
-}
-@keyframes hero-line-in {
-  from {
-    transform: translate3d(0, 110%, 0);
-  }
-  to {
-    transform: translate3d(0, 0, 0);
-  }
 }
 @keyframes hero-fade-in {
   from {
@@ -446,107 +559,143 @@ html.reveal-ready [data-reveal="line"]:not(.is-revealed) {
   }
 }
 
-/* Hero photograph: settles from a slight zoom on load, then drifts very
-   slowly, like a long camera move over the city. */
-.hero-photo {
-  animation:
-    hero-photo-in 2.4s var(--ease-out-expo) both,
-    hero-photo-drift 40s ease-in-out 2.4s infinite alternate;
+.hero-plane {
+  position: absolute;
+  pointer-events: none;
 }
-@keyframes hero-photo-in {
-  from {
-    opacity: 0;
-    transform: scale(1.12);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1.04);
-  }
-}
-@keyframes hero-photo-drift {
-  from {
-    transform: scale(1.04) translate3d(0, 0, 0);
-  }
-  to {
-    transform: scale(1.1) translate3d(-1.5%, -1%, 0);
-  }
-}
-/* The veil over the hero photo. Narrow screens set the copy over the whole
-   picture, so the veil is even and deepens towards the bottom; wide screens
-   keep the copy side solid and let the city show on the right. The colour is
-   the stage's own: navy in the dark theme, near-white in the light one. */
-.hero-scrim {
-  --scrim: 3 10 24;
-  background: linear-gradient(
-    180deg,
-    rgb(var(--scrim) / 0.72) 0%,
-    rgb(var(--scrim) / 0.84) 45%,
-    rgb(var(--scrim) / 0.95) 100%
+/* Left: the soft plane, cut on a slant, with a fine diagonal hatch. */
+.hero-plane--l {
+  inset: 0 auto 0 0;
+  width: 100%;
+  background-color: var(--plane-soft);
+  background-image: repeating-linear-gradient(
+    -66deg,
+    var(--hatch) 0 1px,
+    transparent 1px 26px
   );
+  clip-path: polygon(0 0, 100% 0, 100% 46%, 0 64%);
+  animation: plane-in-l 1.1s var(--ease-out-expo) both;
 }
-[data-theme="light"] .hero-scrim {
-  --scrim: 248 251 255;
+/* Right: a tinted plane behind the figure. */
+.hero-plane--r {
+  inset: auto 0 0 0;
+  height: 48%;
+  background: var(--plane-accent);
+  clip-path: polygon(0 26%, 100% 0, 100% 100%, 0 100%);
+  animation: plane-in-r 1.2s 0.12s var(--ease-out-expo) both;
 }
 @media (min-width: 1024px) {
-  .hero-scrim {
-    background:
-      linear-gradient(
-        90deg,
-        rgb(var(--scrim) / 1) 0%,
-        rgb(var(--scrim) / 0.94) 24%,
-        rgb(var(--scrim) / 0.55) 48%,
-        rgb(var(--scrim) / 0.12) 74%,
-        rgb(var(--scrim) / 0) 100%
-      ),
-      linear-gradient(0deg, rgb(var(--scrim) / 0.85) 0%, transparent 30%);
+  .hero-plane--l {
+    width: 54%;
+    clip-path: polygon(0 0, 100% 0, 76% 100%, 0 100%);
+  }
+  .hero-plane--r {
+    inset: 13% 0 9% auto;
+    width: 50%;
+    height: auto;
+    clip-path: polygon(24% 0, 100% 0, 100% 100%, 0 100%);
   }
 }
-
-/* Status dot: a soft beacon next to the hero's overline. */
-.beacon::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: 9999px;
-  background: inherit;
-  animation: beacon 2.4s ease-out infinite;
-}
-@keyframes beacon {
+@keyframes plane-in-l {
   from {
-    transform: scale(1);
-    opacity: 0.7;
+    opacity: 0;
+    transform: translate3d(-24%, 0, 0);
   }
   to {
-    transform: scale(3.2);
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes plane-in-r {
+  from {
     opacity: 0;
+    transform: translate3d(24%, 0, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
-/* Floating particles in stage fields. */
-.particle {
+/* The stripe: skewed, it runs in from off-screen left and stops short of the
+   figure. */
+.hero-stripe {
   position: absolute;
-  width: 2px;
-  height: 2px;
-  border-radius: 9999px;
-  background: var(--particle);
-  animation: particle-rise var(--dur, 14s) linear infinite;
-  animation-delay: var(--d, 0s);
+  left: -10vw;
+  bottom: 7%;
+  width: 52vw;
+  height: 7px;
+  background: linear-gradient(90deg, var(--accent), var(--cyan));
+  transform: skewX(-24deg);
+  animation: stripe-in 1.3s 0.55s var(--ease-out-expo) both;
 }
-@keyframes particle-rise {
-  0% {
-    transform: translate3d(0, 0, 0);
+@keyframes stripe-in {
+  from {
+    transform: translate3d(-140%, 0, 0) skewX(-24deg);
+  }
+  to {
+    transform: translate3d(0, 0, 0) skewX(-24deg);
+  }
+}
+
+/* The canvas fades in once, after the planes. */
+.hero-canvas {
+  animation: hero-canvas-in 1.6s 0.3s ease-out both;
+}
+@keyframes hero-canvas-in {
+  from {
     opacity: 0;
   }
-  10% {
+  to {
     opacity: 1;
   }
-  90% {
-    opacity: 0.8;
+}
+
+/* Dotted orbits around the figure, turning slowly in opposite directions. */
+.hero-orbit {
+  transform-origin: 50% 50%;
+  animation: orbit-spin 80s linear infinite;
+}
+.hero-orbit--rev {
+  animation-duration: 42s;
+  animation-direction: reverse;
+}
+@keyframes orbit-spin {
+  to {
+    transform: rotate(360deg);
   }
-  100% {
-    transform: translate3d(var(--dx, 0px), -40vh, 0);
-    opacity: 0;
-  }
+}
+/* Caption under the figure: fades in each time the figure changes, and a
+   hairline fills over one cycle. */
+.hero-caption {
+  animation: hero-fade-in 0.8s var(--ease-out-expo) both;
+}
+.hero-progress {
+  transform-origin: left center;
+  animation: carousel-progress var(--hero-cycle, 5600ms) linear both;
+}
+.hero-stage[data-paused] .hero-orbit,
+.hero-stage[data-paused] .hero-progress {
+  animation-play-state: paused;
+}
+
+/* Muted sections: a lighter plane cut on a slant across the left, with the
+   same fine hatch as the hero. */
+.section-slant {
+  overflow: hidden;
+}
+.section-slant::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 46%;
+  background-color: rgb(255 255 255 / 0.55);
+  background-image: repeating-linear-gradient(
+    -66deg,
+    rgb(10 31 69 / 0.045) 0 1px,
+    transparent 1px 26px
+  );
+  clip-path: polygon(0 0, 100% 0, 74% 100%, 0 100%);
 }
 
 /* "SCROLL" cue: a hairline with a light running down it. */
@@ -761,20 +910,31 @@ html.reveal-ready [data-reveal="line"]:not(.is-revealed) {
   [data-reveal] .reveal-zoom {
     transition: none;
   }
-  .hero-line > span,
   .hero-fade,
-  .hero-photo {
+  .hero-plane,
+  .hero-stripe,
+  .hero-canvas,
+  .hero-caption {
     animation: none;
   }
+  /* The block reveal shows its content at once, with no bar. */
+  .hero-block::after,
+  [data-reveal="block"]::after {
+    animation: none;
+    transform: scaleX(0);
+  }
+  .hero-block > *,
+  [data-reveal="block"] > *,
+  html.reveal-ready [data-reveal="block"]:not(.is-revealed) > * {
+    animation: none;
+    opacity: 1;
+  }
   .aurora,
-  .beacon::after,
-  .particle,
+  .hero-orbit,
+  .hero-progress,
   .scroll-cue::after,
   .carousel-progress {
     animation: none;
-  }
-  .particle {
-    opacity: 0;
   }
   /* The marquee becomes a static, wrapped list. */
   .marquee {
@@ -822,7 +982,8 @@ html.reveal-ready [data-reveal="line"]:not(.is-revealed) {
 }
 
 @media print {
-  html.reveal-ready [data-reveal]:not(.is-revealed) {
+  html.reveal-ready [data-reveal]:not(.is-revealed),
+  html.reveal-ready [data-reveal="block"]:not(.is-revealed) > * {
     opacity: 1;
     transform: none;
     clip-path: none;

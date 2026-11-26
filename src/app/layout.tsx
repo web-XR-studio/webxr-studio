@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Montserrat, Noto_Sans_JP } from "next/font/google";
+import { Noto_Sans_JP, Oswald } from "next/font/google";
 import { SITE_URL } from "@/lib/site";
 import { DEFAULT_THEME, THEME_INIT_SCRIPT } from "@/lib/theme";
 import "./globals.css";
@@ -7,16 +7,16 @@ import "./globals.css";
 // Self-hosted by next/font, so no request leaves for Google at runtime.
 // Noto Sans JP replaces the OS fallbacks (Yu Gothic renders thin and blurry on
 // Windows); only its Latin slice is preloaded — the Japanese slices are split
-// by unicode-range and fetched on demand. Montserrat sets the English display
-// words and numerals.
+// by unicode-range and fetched on demand. Oswald — a condensed grotesque —
+// sets the English display words, labels and numerals.
 const noto = Noto_Sans_JP({
   subsets: ["latin"],
   variable: "--font-noto",
   display: "swap",
 });
-const montserrat = Montserrat({
+const oswald = Oswald({
   subsets: ["latin"],
-  variable: "--font-montserrat",
+  variable: "--font-oswald",
   display: "swap",
 });
 
@@ -51,7 +51,7 @@ export default function RootLayout({
     <html
       lang="ja"
       data-theme={DEFAULT_THEME}
-      className={`h-full antialiased ${noto.variable} ${montserrat.variable}`}
+      className={`h-full antialiased ${noto.variable} ${oswald.variable}`}
       suppressHydrationWarning
     >
       <head>
